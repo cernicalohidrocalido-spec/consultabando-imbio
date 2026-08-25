@@ -500,7 +500,7 @@ function construirIndiceOrigenCodigo() {
   INDEX_ORIGEN_CODIGO = idx;
 }
 
-fetch("data/articulos.json?v=origen2024")
+fetch("data/articulos.json?v=bando20240824")
   .then(r => r.json())
   .then(d => { ARTICULOS = d; construirIndiceOrigenCodigo(); llenarSelectReglamentos(); })
   .catch(() => { cargaError = true; });
