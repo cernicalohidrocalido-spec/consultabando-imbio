@@ -11,24 +11,23 @@
     --bg:#fbfdfb; --card:#ffffff; --texto:#22301f; --texto-sec:#5a6b57;
     --borde:#e1ece2; --sombra: 0 2px 10px rgba(31,107,66,.08);
   }
-  @media (prefers-color-scheme: dark){
-    :root{ --bg:#12160f; --card:#1a201a; --texto:#eef4ec; --texto-sec:#a9b8a6;
-      --borde:#2a352a; --verde-claro:#16281c; --sombra:0 2px 12px rgba(0,0,0,.4); }
-  }
+  /* Tema claro fijo: en móvil con modo oscuro del sistema el contraste
+     del esquema oscuro anterior dejaba títulos y tarjetas ilegibles. */
   *{box-sizing:border-box}
   body{ margin:0; background:var(--bg); color:var(--texto);
-    font-family:"Segoe UI", system-ui, -apple-system, sans-serif; line-height:1.6; }
+    font-family:"Segoe UI", system-ui, -apple-system, sans-serif; line-height:1.6;
+    color-scheme: light; }
   a{color:var(--azul)}
   header{ background:linear-gradient(135deg, var(--azul), #1e4a7a); color:#fff;
     padding:2rem 1.2rem 2.2rem; text-align:center; }
   header .volver{ display:inline-block; margin-bottom:1rem; color:#cfe0f2; font-size:.88rem; text-decoration:none; }
-  header h1{ margin:.2rem 0; font-size:1.6rem }
-  header p{ max-width:680px; margin:.6rem auto 0; opacity:.95; font-size:1rem }
+  header h1{ margin:.2rem 0; font-size:1.6rem; color:#fff }
+  header p{ max-width:680px; margin:.6rem auto 0; opacity:.95; font-size:1rem; color:#fff }
   main{ max-width:880px; margin:0 auto; padding:1.6rem 1rem 3rem }
   section{ background:var(--card); border:1px solid var(--borde); border-radius:16px;
-    padding:1.5rem; margin-bottom:1.4rem; box-shadow:var(--sombra); }
+    padding:1.5rem; margin-bottom:1.4rem; box-shadow:var(--sombra); color:var(--texto) }
   section h2{ margin:0 0 .8rem; font-size:1.25rem; color:var(--verde-oscuro); display:flex; align-items:center; gap:.5rem }
-  section p{ margin:0 0 .9rem; font-size:.97rem }
+  section p{ margin:0 0 .9rem; font-size:.97rem; color:var(--texto) }
   section p:last-child{ margin-bottom:0 }
 
   .diagrama{ display:flex; flex-direction:column; gap:.5rem; align-items:center; margin:1.2rem 0; }
@@ -39,13 +38,13 @@
   .flecha{ font-size:1.3rem; color:var(--texto-sec) }
 
   .ventajas-grid, .desventajas-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:.8rem; }
-  .item{ border-radius:10px; padding:.85rem .95rem; font-size:.88rem; }
-  .item.v{ background:var(--verde-claro); border-left:3px solid var(--verde); }
-  .item.d{ background:#fdf3e7; border-left:3px solid var(--amarillo); }
+  .item{ border-radius:10px; padding:.85rem .95rem; font-size:.88rem; color:var(--texto) }
+  .item.v{ background:var(--verde-claro); border-left:3px solid var(--verde); color:var(--texto) }
+  .item.d{ background:#fdf3e7; border-left:3px solid var(--amarillo); color:var(--texto) }
   .item b{ display:block; margin-bottom:.25rem; font-size:.92rem; color:var(--texto) }
 
   .conteo{ display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:.6rem; margin-top:1rem }
-  .conteo .c{ background:var(--bg); border:1px solid var(--borde); border-radius:10px; padding:.6rem .8rem; font-size:.82rem; }
+  .conteo .c{ background:var(--bg); border:1px solid var(--borde); border-radius:10px; padding:.6rem .8rem; font-size:.82rem; color:var(--texto) }
   .conteo .c b{ display:block; font-size:1.1rem; color:var(--verde-oscuro) }
 
   .nota{ background:var(--verde-claro); border-radius:12px; padding:1rem 1.2rem; font-size:.88rem; color:var(--texto-sec); margin-top:.5rem }
