@@ -1,0 +1,11 @@
+name = "imbio-asistente"
+main = "worker.js"
+compatibility_date = "2026-08-01"
+
+# Configura el origen permitido (sin barra final):
+#   wrangler secret put ANTHROPIC_API_KEY
+#   wrangler vars put ALLOWED_ORIGIN   → https://imbio.info
+# O define [vars] aquí para ALLOWED_ORIGIN (no pongas la API key en este archivo).
+
+[vars]
+ALLOWED_ORIGIN = "https://imbio.info"

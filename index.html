@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Consulta Pública — Paquete Normativo Municipal | Pabellón de Arteaga</title>
+<style>
+  :root{
+    --verde:#2f8f5b;
+    --verde-oscuro:#1f6b42;
+    --verde-claro:#eaf7ef;
+    --azul:#2e6ea6;
+    --amarillo:#f4b400;
+    --naranja:#c1622a;
+    --bg:#fbfdfb;
+    --card:#ffffff;
+    --texto:#22301f;
+    --texto-sec:#5a6b57;
+    --borde:#e1ece2;
+    --sombra: 0 2px 10px rgba(31,107,66,.08);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#12160f; --card:#1a201a; --texto:#eef4ec; --texto-sec:#a9b8a6;
+      --borde:#2a352a; --verde-claro:#16281c; --sombra:0 2px 12px rgba(0,0,0,.4);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--texto);
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    line-height:1.5;
+  }
+  a{color:var(--azul)}
+  header{
+    background:linear-gradient(135deg, var(--verde-oscuro), var(--verde));
+    color:#fff; padding:2rem 1.2rem 2.4rem; text-align:center;
+  }
+  .badge{
+    display:inline-block; background:rgba(255,255,255,.18); padding:.25rem .8rem;
+    border-radius:999px; font-size:.8rem; letter-spacing:.03em; margin-bottom:.7rem;
+  }
+  header h1{margin:.2rem 0; font-size:1.7rem}
+  header p{max-width:640px; margin:.6rem auto 0; opacity:.95; font-size:1rem}
+  .kid-toggle{
+    margin-top:1rem; background:#fff; color:var(--verde-oscuro); border:none;
+    padding:.55rem 1.1rem; border-radius:999px; font-weight:600; cursor:pointer;
+    font-size:.95rem;
+  }
+  main{max-width:920px; margin:0 auto; padding:1.4rem 1rem 3rem}
+
+  .asistente{
+    background:var(--card); border:1px solid var(--borde); border-radius:16px;
+    padding:1.3rem; box-shadow:var(--sombra); margin-bottom:1.6rem;
+  }
+  .asistente h2{margin:0 0 .3rem; font-size:1.25rem; color:var(--verde-oscuro)}
+  .asistente p.sub{margin:0 0 .9rem; color:var(--texto-sec); font-size:.92rem}
+  .pregunta-row{display:flex; gap:.5rem; flex-wrap:wrap}
+  #pregunta{
+    flex:1 1 260px; padding:.75rem .9rem; border-radius:10px; border:1px solid var(--borde);
+    font-size:1rem; background:var(--bg); color:var(--texto);
+  }
+  #btnPreguntar{
+    background:var(--verde); color:#fff; border:none; border-radius:10px;
+    padding:.75rem 1.2rem; font-weight:600; cursor:pointer; font-size:.95rem;
+  }
+  #btnPreguntar:disabled{opacity:.6; cursor:default}
+  .ejemplos{margin-top:.6rem; font-size:.85rem; color:var(--texto-sec)}
+  .ejemplos button{
+    background:var(--verde-claro); border:1px solid var(--borde); color:var(--verde-oscuro);
+    border-radius:999px; padding:.3rem .7rem; margin:.25rem .3rem 0 0; font-size:.82rem; cursor:pointer;
+  }
+  #resultado{margin-top:1.1rem}
+  .respuesta-ia{
+    background:var(--verde-claro); border-radius:12px; padding:.9rem 1rem; margin-bottom:.9rem;
+    font-size:.98rem; white-space:pre-wrap;
+  }
+  .respuesta-ia .etiqueta{font-size:.75rem; text-transform:uppercase; letter-spacing:.04em; color:var(--verde-oscuro); font-weight:700; display:block; margin-bottom:.35rem}
+  .articulo-hit{
+    border:1px solid var(--borde); border-left:4px solid var(--verde); border-radius:10px;
+    padding:.8rem .95rem; margin-bottom:.65rem; background:var(--card);
+  }
+  .articulo-hit .meta{font-size:.8rem; color:var(--verde-oscuro); font-weight:700; margin-bottom:.3rem}
+  .articulo-hit .texto{font-size:.92rem; color:var(--texto)}
+  .sin-hits{color:var(--texto-sec); font-size:.92rem; padding:.6rem 0}
+  .cargando{color:var(--texto-sec); font-size:.9rem}
+
+  .pasos{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:.8rem; margin-bottom:1.6rem}
+  .paso{background:var(--card); border:1px solid var(--borde); border-radius:12px; padding:.9rem; font-size:.88rem; color:var(--texto-sec)}
+  .paso b{display:block; color:var(--texto); font-size:.95rem; margin-bottom:.2rem}
+
+  h2.sec{font-size:1.2rem; color:var(--verde-oscuro); margin:1.8rem 0 .6rem}
+  .controles{display:flex; gap:.6rem; margin-bottom:.7rem; flex-wrap:wrap}
+  #buscador{flex:1 1 220px; padding:.6rem .8rem; border-radius:10px; border:1px solid var(--borde); background:var(--card); color:var(--texto); font-size:.95rem}
+  .chips{display:flex; flex-wrap:wrap; gap:.4rem; margin-bottom:.6rem}
+  .chip{
+    border:1px solid var(--borde); background:var(--card); color:var(--texto-sec);
+    padding:.35rem .8rem; border-radius:999px; font-size:.82rem; cursor:pointer;
+  }
+  .chip.activo{background:var(--verde); color:#fff; border-color:var(--verde)}
+  #contador{font-size:.82rem; color:var(--texto-sec); margin-bottom:.6rem}
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:.9rem}
+  .tarjeta{
+    background:var(--card); border:1px solid var(--borde); border-radius:14px; padding:1rem;
+    box-shadow:var(--sombra); display:flex; flex-direction:column; gap:.4rem;
+  }
+  .tarjeta .icono{font-size:1.6rem}
+  .tarjeta h3{margin:0; font-size:1.02rem}
+  .tarjeta p{margin:0; font-size:.88rem; color:var(--texto-sec)}
+  .tarjeta .kid{display:none; font-size:.88rem; color:var(--texto-sec); font-style:italic}
+  body.modo-kid .tarjeta p.resumen{display:none}
+  body.modo-kid .tarjeta .kid{display:block}
+  .tarjeta a.enlace{font-size:.85rem; margin-top:.3rem; font-weight:600}
+  .sin-resultados{display:none; text-align:center; color:var(--texto-sec); padding:1.5rem}
+
+  .cta{
+    margin-top:2rem; background:var(--verde-claro); border-radius:16px; padding:1.4rem; text-align:center;
+  }
+  .cta a.boton{
+    display:inline-block; margin-top:.6rem; background:var(--amarillo); color:#3a2a00;
+    padding:.7rem 1.4rem; border-radius:999px; font-weight:700; text-decoration:none;
+  }
+  footer{text-align:center; padding:1.6rem 1rem 2.4rem; color:var(--texto-sec); font-size:.85rem}
+</style>
+</head>
+<body>
+
+<header>
+  <span class="badge">Consulta pública · agosto 2026</span>
+  <h1>Reglamentos nuevos de Pabellón de Arteaga</h1>
+  <p>El municipio está actualizando el Bando de Policía y Buen Gobierno y sus 11 reglamentos. Aquí puedes leerlos en lenguaje sencillo, buscar artículos reales por tema, y mandarnos tus dudas u observaciones.</p>
+  <button class="kid-toggle" onclick="toggleKid()" id="kidBtn">🧒 Modo fácil</button>
+</header>
+
+<main>
+
+  <div class="pasos">
+    <div class="paso"><b>1. Explora</b>Elige un reglamento o busca un tema (por ejemplo "tianguis" o "ruido").</div>
+    <div class="paso"><b>2. Pregunta</b>Escribe tu duda en la caja de búsqueda y te mostramos los artículos reales que aplican.</div>
+    <div class="paso"><b>3. Opina</b>Manda tu observación directamente al IMBIO con el botón de contacto.</div>
+  </div>
+
+  <section class="asistente">
+    <h2>🔍 Pregúntale a los reglamentos</h2>
+    <p class="sub">Escribe tu duda con tus propias palabras. Buscamos primero en el texto real de los 12 documentos — nunca inventamos artículos.</p>
+    <div class="pregunta-row">
+      <input id="pregunta" type="text" placeholder="Ej. ¿quién regula el tianguis? / ¿qué dice de los perros sueltos?" />
+      <button id="btnPreguntar" onclick="preguntar()">Buscar</button>
+    </div>
+    <div class="ejemplos">
+      Prueba:
+      <button onclick="preguntarEjemplo('¿quién regula el tianguis?')">quién regula el tianguis</button>
+      <button onclick="preguntarEjemplo('ruido excesivo')">ruido excesivo</button>
+      <button onclick="preguntarEjemplo('perros y animales sueltos')">perros sueltos</button>
+      <button onclick="preguntarEjemplo('permiso de construcción')">permiso de construcción</button>
+    </div>
+    <div id="resultado"></div>
+  </section>
+
+  <h2 class="sec">📚 Los 12 documentos</h2>
+  <div class="controles">
+    <input id="buscador" type="text" placeholder="Filtrar por palabra..." oninput="filtrar()" />
+  </div>
+  <div class="chips" id="chips"></div>
+  <div id="contador"></div>
+  <div class="grid" id="grid"></div>
+  <div class="sin-resultados" id="sinResultados">No encontramos reglamentos con esa búsqueda. Intenta con otra palabra.</div>
+
+  <div class="cta" id="consulta">
+    <h2 style="margin-top:0">✍️ ¿Tienes una duda u observación?</h2>
+    <p>Cuéntanos qué piensas de los reglamentos. Todas las observaciones se revisan antes de presentar el paquete a Cabildo.</p>
+    <a class="boton" id="linkFormGeneral" href="#" target="_blank" rel="noopener">Enviar mi duda u observación</a>
+  </div>
+
+</main>
+
+<footer>
+  Instituto Municipal de Biodiversidad y Protección Ambiental (IMBIO) · Pabellón de Arteaga, Aguascalientes ·
+  <a href="https://imbio.info" target="_blank" rel="noopener">imbio.info</a>
+</footer>
+
+<script>
+/* ============================================================
+   CONFIGURACIÓN — edita estas dos líneas cuando tengas listos
+   el formulario y el Worker de Cloudflare.
+   ============================================================ */
+const FORM_URL = "PON_AQUI_TU_ENLACE_DE_JOTFORM_O_GOOGLE_FORMS";
+// URL del Worker de Cloudflare (ver worker.js). Déjalo vacío ("")
+// para que la búsqueda funcione SOLO con el texto real (sin IA)
+// mientras despliegas el Worker.
+const ASISTENTE_URL = ""; // ej: "https://api.imbio.info"
+
+/* ============================================================
+   Catálogo de reglamentos (para las tarjetas de exploración)
+   ============================================================ */
+const REGLAMENTOS = [
+  {id:"bando", categoria:"General", color:"#2f8f5b", icono:"🏛️", titulo:"Bando de Policía y Buen Gobierno",
+   resumen:"Las reglas generales de convivencia y organización del municipio.",
+   kid:"Es como el reglamento principal: dice cómo se organiza el pueblo y cómo debemos tratarnos bien."},
+  {id:"actos", categoria:"General", color:"#2f8f5b", icono:"⚖️", titulo:"Actos y Procedimientos Administrativos",
+   resumen:"Cómo se aplican las sanciones y cómo puedes defenderte si no estás de acuerdo con una multa.",
+   kid:"Explica qué pasa si alguien rompe una regla, y cómo puede decir 'yo no hice nada malo' si cree que se equivocaron."},
+  {id:"seguridad", categoria:"Seguridad y movilidad", color:"#2e6ea6", icono:"🚓", titulo:"Seguridad Pública y Movilidad",
+   resumen:"La policía municipal, el tránsito y cómo nos movemos por las calles.",
+   kid:"Habla de los policías que nos cuidan y de las reglas para caminar, andar en bici o manejar."},
+  {id:"urbano", categoria:"Territorio", color:"#c1622a", icono:"🏗️", titulo:"Desarrollo Urbano",
+   resumen:"Cómo se planea el crecimiento del municipio: dónde se puede construir y cómo.",
+   kid:"Dice en dónde se pueden hacer casas nuevas y cómo debe crecer el pueblo de forma ordenada."},
+  {id:"gobierno", categoria:"General", color:"#2f8f5b", icono:"🏢", titulo:"Gobierno Interior",
+   resumen:"Cómo funciona por dentro el Ayuntamiento: sus áreas y responsabilidades.",
+   kid:"Explica cómo está organizado el equipo de gobierno del municipio, como si fuera un organigrama."},
+  {id:"patrimonio", categoria:"Territorio", color:"#c1622a", icono:"🏺", titulo:"Patrimonio Municipal",
+   resumen:"Cómo se cuidan los bienes del municipio: edificios, terrenos y objetos históricos.",
+   kid:"Cuida las cosas del pueblo: parques, edificios viejos y objetos importantes de la historia."},
+  {id:"biodiversidad", categoria:"Ambiente", color:"#1f6b42", icono:"🌳", titulo:"Biodiversidad y Protección Ambiental",
+   resumen:"La protección de plantas, animales, agua y aire del municipio.",
+   kid:"Cuida a los animales, las plantas, el agua y el aire para que el pueblo siga siendo bonito."},
+  {id:"comercio", categoria:"Economía", color:"#f4b400", icono:"🛒", titulo:"Comercio",
+   resumen:"Los permisos y reglas para tiendas, puestos y comercio en la vía pública, incluido el tianguis.",
+   kid:"Son las reglas para las tiendas y los puestos de la calle, como el tianguis."},
+  {id:"espectaculos", categoria:"Economía", color:"#f4b400", icono:"🎉", titulo:"Espectáculos y Diversiones Públicas",
+   resumen:"Los permisos para eventos, ferias, bailes y diversiones públicas.",
+   kid:"Son las reglas para las fiestas, ferias y eventos que se hacen en el pueblo."},
+  {id:"capapa", categoria:"Territorio", color:"#c1622a", icono:"🧱", titulo:"Construcción, Alineamiento, Predios y Anuncios (CAPAPA)",
+   resumen:"Los permisos de construcción, alineación de predios y anuncios.",
+   kid:"Dice qué permisos se necesitan para construir una casa o poner un anuncio grande."},
+  {id:"servicios", categoria:"General", color:"#2f8f5b", icono:"🚰", titulo:"Servicios Públicos Municipales",
+   resumen:"El agua, la basura, el alumbrado y otros servicios que da el municipio.",
+   kid:"Habla de servicios como el agua, la luz de las calles y la recolección de basura."},
+  {id:"trabajo", categoria:"General", color:"#2f8f5b", icono:"👷", titulo:"Condiciones de Trabajo",
+   resumen:"Las reglas laborales para quienes trabajan en el Ayuntamiento.",
+   kid:"Son las reglas para las personas que trabajan en el gobierno del municipio."},
+];
+
+/* ============================================================
+   Sinónimos para ayudar a la búsqueda por temas cotidianos
+   ============================================================ */
+const SINONIMOS = {
+  tianguis: ["comercio", "ambulante", "vía pública", "puesto", "vendedor"],
+  ruido: ["sonido", "molestias", "escándalo", "audio"],
+  perros: ["animales", "mascotas", "fauna", "animal"],
+  construcción: ["obra", "edificación", "predio", "licencia", "alineamiento"],
+  basura: ["residuos", "limpieza", "recolección"],
+  agua: ["hídrico", "drenaje", "alcantarillado"],
+  multa: ["sanción", "infracción"],
+  fiesta: ["evento", "espectáculo", "feria", "baile"],
+  tránsito: ["movilidad", "vialidad", "circulación", "vehículo"],
+  árboles: ["arbolado", "vegetación", "poda", "forestal"],
+};
+
+let ARTICULOS = [];
+let cargaError = false;
+
+fetch("data/articulos.json")
+  .then(r => r.json())
+  .then(d => { ARTICULOS = d; })
+  .catch(() => { cargaError = true; });
+
+/* ---------- Tarjetas de reglamentos ---------- */
+function chipHTML(){
+  const cats = ["Todos", ...new Set(REGLAMENTOS.map(r=>r.categoria))];
+  document.getElementById("chips").innerHTML = cats.map((c,i)=>
+    `<button class="chip ${i===0?'activo':''}" data-cat="${c}" onclick="setCategoria('${c}')">${c}</button>`
+  ).join("");
+}
+let categoriaActual = "Todos";
+function setCategoria(c){
+  categoriaActual = c;
+  document.querySelectorAll(".chip").forEach(b=>b.classList.toggle("activo", b.dataset.cat===c));
+  filtrar();
+}
+function formLinkFor(r){ return r.formUrl || FORM_URL; }
+function tarjetaHTML(r){
+  return `<div class="tarjeta" style="border-top:4px solid ${r.color}">
+    <div class="icono">${r.icono}</div>
+    <h3>${r.titulo}</h3>
+    <p class="resumen">${r.resumen}</p>
+    <p class="kid">${r.kid}</p>
+    <a class="enlace" href="${formLinkFor(r)}" target="_blank" rel="noopener">Enviar duda sobre este reglamento →</a>
+  </div>`;
+}
+function render(lista){
+  document.getElementById("grid").innerHTML = lista.map(tarjetaHTML).join("");
+  document.getElementById("contador").textContent = `${lista.length} de ${REGLAMENTOS.length} reglamentos`;
+  document.getElementById("sinResultados").style.display = lista.length ? "none" : "block";
+}
+function filtrar(){
+  const q = document.getElementById("buscador").value.trim().toLowerCase();
+  let lista = REGLAMENTOS.filter(r => categoriaActual==="Todos" || r.categoria===categoriaActual);
+  if(q){
+    lista = lista.filter(r =>
+      r.titulo.toLowerCase().includes(q) ||
+      r.resumen.toLowerCase().includes(q) ||
+      r.kid.toLowerCase().includes(q) ||
+      r.categoria.toLowerCase().includes(q)
+    );
+  }
+  render(lista);
+}
+function toggleKid(){
+  document.body.classList.toggle("modo-kid");
+  const on = document.body.classList.contains("modo-kid");
+  document.getElementById("kidBtn").textContent = on ? "🧑 Modo normal" : "🧒 Modo fácil";
+}
+
+/* ---------- Buscador de artículos reales ---------- */
+function expandirPalabras(q){
+  const palabras = q.toLowerCase()
+    .normalize("NFD").replace(/[̀-ͯ]/g,"") // quita acentos para comparar
+    .replace(/[¿?¡!.,;:]/g,"")
+    .split(/\s+/)
+    .filter(w => w.length > 2 && !["que","quien","donde","como","para","los","las","del","una","con","por"].includes(w));
+  const set = new Set(palabras);
+  for(const [base, syns] of Object.entries(SINONIMOS)){
+    const baseSin = base.normalize("NFD").replace(/[̀-ͯ]/g,"");
+    if(palabras.includes(baseSin)){
+      syns.forEach(s => set.add(s.normalize("NFD").replace(/[̀-ͯ]/g,"")));
+    }
+  }
+  return [...set];
+}
+function normaliza(s){ return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,""); }
+
+function buscarArticulos(pregunta, maxResultados=6){
+  const palabras = expandirPalabras(pregunta);
+  if(palabras.length===0) return [];
+  const puntuados = [];
+  for(const a of ARTICULOS){
+    const txt = normaliza(a.texto);
+    let score = 0;
+    for(const p of palabras){
+      if(txt.includes(p)) score += 1;
+    }
+    if(score>0) puntuados.push({...a, score});
+  }
+  puntuados.sort((a,b)=> b.score - a.score);
+  return puntuados.slice(0, maxResultados);
+}
+
+function preguntarEjemplo(txt){
+  document.getElementById("pregunta").value = txt;
+  preguntar();
+}
+
+async function preguntar(){
+  const pregunta = document.getElementById("pregunta").value.trim();
+  const cont = document.getElementById("resultado");
+  const btn = document.getElementById("btnPreguntar");
+  if(!pregunta){ return; }
+
+  if(cargaError || ARTICULOS.length===0){
+    cont.innerHTML = `<div class="sin-hits">No pude cargar el índice de artículos (data/articulos.json). Verifica que ese archivo esté en la carpeta data/ junto al sitio.</div>`;
+    return;
+  }
+
+  btn.disabled = true;
+  cont.innerHTML = `<div class="cargando">Buscando en los reglamentos…</div>`;
+
+  const hits = buscarArticulos(pregunta);
+
+  if(hits.length===0){
+    cont.innerHTML = `<div class="sin-hits">No encontré artículos relacionados. Intenta con otras palabras, o manda tu duda directamente con el botón de abajo.</div>`;
+    btn.disabled = false;
+    return;
+  }
+
+  // Muestra siempre los artículos reales encontrados (sin IA, funciona siempre)
+  let html = hits.map(h => `
+    <div class="articulo-hit">
+      <div class="meta">${h.reglamento} — Artículo ${h.articulo}</div>
+      <div class="texto">${h.texto}</div>
+    </div>
+  `).join("");
+
+  // Si hay Worker de Cloudflare configurado, pide además una respuesta en lenguaje natural
+  if(ASISTENTE_URL){
+    try{
+      const resp = await fetch(ASISTENTE_URL, {
+        method:"POST",
+        headers:{"content-type":"application/json"},
+        body: JSON.stringify({
+          pregunta,
+          fragmentos: hits.map(h=>({reglamento:h.reglamento, articulo:h.articulo, texto:h.texto}))
+        })
+      });
+      if(resp.ok){
+        const data = await resp.json();
+        html = `<div class="respuesta-ia"><span class="etiqueta">Respuesta</span>${data.respuesta}</div>` + html;
+      }
+    }catch(e){
+      // Si el asistente falla, igual mostramos los artículos reales encontrados arriba.
+    }
+  }
+
+  cont.innerHTML = html;
+  btn.disabled = false;
+}
+
+document.getElementById("pregunta").addEventListener("keydown", e=>{
+  if(e.key==="Enter") preguntar();
+});
+
+/* ---------- Inicialización ---------- */
+document.getElementById("linkFormGeneral").href = FORM_URL;
+chipHTML();
+render(REGLAMENTOS);
+</script>
+</body>
+</html>
