@@ -121,11 +121,16 @@
     font-size:.78rem;font-weight:700;color:var(--azul-marino);margin-bottom:.35rem;
   }
   .origen-box .origen-texto{font-size:.88rem;color:var(--texto);line-height:1.5}
-  .origen-box a.pdf-codigo{
-    display:inline-block;margin-top:.55rem;font-size:.82rem;font-weight:600;
+  .origen-box a.pdf-codigo,
+  .origen-box a.link-codigo{
+    display:inline-block;margin-top:.55rem;margin-right:.85rem;font-size:.82rem;font-weight:600;
     color:var(--azul-marino);text-decoration:none;
   }
-  .origen-box a.pdf-codigo:hover{text-decoration:underline}
+  .origen-box a.pdf-codigo:hover,
+  .origen-box a.link-codigo:hover{text-decoration:underline}
+  .origen-box .cod-meta a{
+    color:inherit;text-decoration:underline;text-underline-offset:2px;
+  }
   .form-panel{
     margin-top:.75rem;padding:.85rem;border:1px solid var(--borde);border-radius:12px;
     background:var(--card);box-shadow:var(--sombra);
@@ -220,6 +225,14 @@ const OBSERVACIONES_URL = "https://observaciones.imbio.info/enviar";
 const BTN_OPINAR = "💬 Opinar sobre este artículo";
 
 const CATALOGO = {
+  codigo: {
+    titulo: "Código Municipal 2024",
+    color: "#5a6b7a",
+    pdf: "pdfs/Codigo_Municipal_v2024.pdf",
+    fuente: "data/codigo_municipal.json?v=lecturaCodigo1",
+    soloConsulta: true,
+    nombreLegal: "Código Municipal de Pabellón de Arteaga (versión 2024)",
+  },
   bando: { titulo: "Bando de Policía y Buen Gobierno", color: "#2f8f5b", pdf: "pdfs/Bando_Policia_Buen_Gobierno_Pabellon.pdf" },
   actos: { titulo: "Actos y Procedimientos Administrativos", color: "#2f8f5b", pdf: "pdfs/Reglamento_Actos_Procedimientos_Administrativos_Pabellon.pdf" },
   seguridad: { titulo: "Seguridad Pública y Movilidad", color: "#2e6ea6", pdf: "pdfs/Reglamento_Seguridad_Publica_Movilidad_Pabellon.pdf" },
@@ -236,15 +249,24 @@ const CATALOGO = {
 
 const params = new URLSearchParams(location.search);
 const docId = params.get("doc") || "";
-const hashArt = location.hash.replace(/^#art-/, "");
 
 function numArticulo(a) {
-  const n = parseFloat(String(a.articulo).replace(",", "."));
+  const raw = String(a.articulo || "");
+  const m = raw.match(/^(\d+(?:[.,]\d+)?)/);
+  const n = m ? parseFloat(m[1].replace(",", ".")) : NaN;
   return Number.isFinite(n) ? n : 999999;
 }
 
 function slugArt(n) {
   return String(n).replace(/[^\w.-]+/g, "-");
+}
+
+function textoCodigoLimpio(texto) {
+  return String(texto || "").replace(/^\s*º\s*[.-]\s*/i, "").replace(/^\s*[.-]\s*/, "");
+}
+
+function hrefCodigoArt(num) {
+  return `lectura.html?doc=codigo#art-${encodeURIComponent(slugArt(num))}`;
 }
 
 function normaliza(s) {
@@ -276,16 +298,19 @@ function origenHtml(a) {
   else if (nums.length === 2) listaNums = `Artículos ${nums[0]} y ${nums[1]}`;
   else listaNums = `Artículos ${nums.slice(0, -1).join(", ")} y ${nums[nums.length - 1]}`;
 
-  const bloques = origen.map((o) => `
+  const bloques = origen.map((o) => {
+    const num = String(o.articulo_codigo);
+    const href = hrefCodigoArt(num);
+    return `
       <div class="origen-bloque">
-        <div class="cod-meta">Código Municipal 2024 — Artículo ${escapeHtml(String(o.articulo_codigo))}</div>
+        <div class="cod-meta"><a href="${href}">Código Municipal 2024 — Artículo ${escapeHtml(num)}</a></div>
         <div class="origen-texto">${formatTextoLegal(o.texto || "")}</div>
-      </div>`).join("");
+        <a class="link-codigo" href="${href}">Consultar artículo ${escapeHtml(num)} en el Código →</a>
+      </div>`;
+  }).join("");
 
-  // Query distinta por artículo para que el navegador no reutilice
-  // la pestaña del PDF abierta antes (p. ej. siempre en el 1111).
-  const pdfKey = origen.map((o) => String(o.articulo_codigo)).join(",");
-  const pdfHref = `pdfs/Codigo_Municipal_v2024.pdf?origen=${encodeURIComponent(pdfKey)}`;
+  const primero = String(origen[0].articulo_codigo);
+  const hrefPrimero = hrefCodigoArt(primero);
 
   return `<aside class="origen-box">
       <p class="origen-label">📜 Origen: Código Municipal 2024, ${listaNums}</p>
@@ -293,12 +318,13 @@ function origenHtml(a) {
         <summary>Ver texto original</summary>
         ${bloques}
       </details>
-      <a class="pdf-codigo" href="${pdfHref}" target="codigoMunicipalPdf" rel="noopener">Ver PDF completo del Código →</a>
+      <a class="link-codigo" href="${hrefPrimero}">Consultar en el Código (HTML) →</a>
+      <a class="pdf-codigo" href="pdfs/Codigo_Municipal_v2024.pdf" target="_blank" rel="noopener">Ver PDF completo del Código →</a>
     </aside>`;
 }
 
 function formPanelHtml(a) {
-  const id = slugArt(a.articulo);
+  const id = a._slug || slugArt(a.articulo);
   const artVal = escapeHtml(String(a.articulo));
   return `<div class="form-panel" hidden>
     <p class="form-panel-hint">Tu observación se envía al IMBIO y queda ligada a este artículo.</p>
@@ -408,6 +434,8 @@ async function init() {
     return;
   }
 
+  const soloConsulta = !!cat.soloConsulta;
+
   document.getElementById("tituloDoc").textContent = cat.titulo;
   document.title = `${cat.titulo} — Lectura | IMBIO`;
   document.querySelector(".topbar").style.borderBottom = `3px solid ${cat.color}`;
@@ -419,57 +447,93 @@ async function init() {
     linkPdf.hidden = true;
   }
 
-  let todos;
+  let arts;
   try {
-    const r = await fetch("data/articulos.json?v=notasEd1");
-    todos = await r.json();
+    if (cat.fuente) {
+      const r = await fetch(cat.fuente);
+      const raw = await r.json();
+      arts = raw.map((a, i) => ({
+        articulo: a.articulo,
+        texto: textoCodigoLimpio(a.texto),
+        reglamento: cat.nombreLegal || cat.titulo,
+        _idx: i,
+      })).sort((a, b) => numArticulo(a) - numArticulo(b) || a._idx - b._idx);
+    } else {
+      const r = await fetch("data/articulos.json?v=notasEd1");
+      const todos = await r.json();
+      arts = todos.filter((a) => a.doc === docId).sort((a, b) => numArticulo(a) - numArticulo(b));
+    }
   } catch {
-    renderError("No pude cargar el índice de artículos (data/articulos.json).");
+    renderError(cat.fuente
+      ? "No pude cargar el Código Municipal (data/codigo_municipal.json)."
+      : "No pude cargar el índice de artículos (data/articulos.json).");
     return;
   }
 
-  const arts = todos.filter((a) => a.doc === docId).sort((a, b) => numArticulo(a) - numArticulo(b));
   if (arts.length === 0) {
-    renderError("Este reglamento no tiene artículos en el índice.");
+    renderError("Este documento no tiene artículos en el índice.");
     return;
   }
 
-  const nombreLegal = arts[0].reglamento;
-  document.getElementById("metaDoc").textContent = `${arts.length} artículos · texto oficial`;
+  // IDs únicos (el Código tiene algunos números repetidos en el JSON fuente)
+  const slugCount = Object.create(null);
+  arts.forEach((a) => {
+    const base = slugArt(a.articulo);
+    const n = (slugCount[base] || 0) + 1;
+    slugCount[base] = n;
+    a._slug = n === 1 ? base : `${base}-${n}`;
+  });
+
+  const nombreLegal = cat.nombreLegal || arts[0].reglamento;
+  document.getElementById("metaDoc").textContent = soloConsulta
+    ? `${arts.length} artículos · solo consulta`
+    : `${arts.length} artículos · texto oficial`;
 
   const toc = document.getElementById("tocList");
   const cuerpo = document.getElementById("contenido");
 
   toc.innerHTML = arts.map((a) => {
-    const id = slugArt(a.articulo);
-    return `<li><a href="#art-${id}" data-art="${id}">Artículo ${escapeHtml(String(a.articulo))}</a></li>`;
+    return `<li><a href="#art-${a._slug}" data-art="${a._slug}">Artículo ${escapeHtml(String(a.articulo))}</a></li>`;
   }).join("");
 
+  const intro = soloConsulta
+    ? `<p class="intro"><strong>${escapeHtml(nombreLegal)}</strong> — lectura de consulta del ordenamiento vigente. El texto no se altera; las observaciones sobre la reforma se envían desde el Bando y los reglamentos derivados.</p>`
+    : `<p class="intro"><strong>${escapeHtml(nombreLegal)}</strong> — lectura continua con índice. El texto proviene del paquete normativo en consulta pública; no se ha alterado.</p>`;
+
   cuerpo.innerHTML = `
-    <p class="intro"><strong>${escapeHtml(nombreLegal)}</strong> — lectura continua con índice. El texto proviene del paquete normativo en consulta pública; no se ha alterado.</p>
+    ${intro}
     ${arts.map((a) => {
-      const id = slugArt(a.articulo);
+      const id = a._slug;
+      const extras = soloConsulta
+        ? ""
+        : `${origenHtml(a)}
+        <button type="button" class="btn-opinar" aria-expanded="false">${BTN_OPINAR}</button>
+        ${formPanelHtml(a)}`;
       return `<article class="articulo" id="art-${id}" data-art="${id}">
         <h3>Artículo ${escapeHtml(String(a.articulo))}</h3>
         ${notaEditorialHtml(a)}
         <div class="texto">${formatTextoLegal(a.texto)}</div>
-        ${origenHtml(a)}
-        <button type="button" class="btn-opinar" aria-expanded="false">${BTN_OPINAR}</button>
-        ${formPanelHtml(a)}
+        ${extras}
       </article>`;
     }).join("")}
   `;
 
-  cuerpo.addEventListener("click", (e) => {
-    const btn = e.target.closest(".btn-opinar");
-    if (btn) toggleFormPanel(btn);
-  });
-  cuerpo.addEventListener("submit", onFormSubmit);
-
-  if (hashArt) {
-    const el = document.getElementById("art-" + hashArt);
-    if (el) setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+  if (!soloConsulta) {
+    cuerpo.addEventListener("click", (e) => {
+      const btn = e.target.closest(".btn-opinar");
+      if (btn) toggleFormPanel(btn);
+    });
+    cuerpo.addEventListener("submit", onFormSubmit);
   }
+
+  function scrollToHash() {
+    const hash = location.hash.replace(/^#art-/, "");
+    if (!hash) return;
+    const el = document.getElementById("art-" + hash);
+    if (el) setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
+  }
+  scrollToHash();
+  window.addEventListener("hashchange", scrollToHash);
 
   document.getElementById("buscaToc").addEventListener("input", (e) => {
     const q = normaliza(e.target.value.trim());
@@ -481,7 +545,6 @@ async function init() {
       return;
     }
     arts.forEach((a, i) => {
-      const id = slugArt(a.articulo);
       const txt = normaliza(a.texto);
       const num = normaliza(String(a.articulo));
       const match = num.includes(q) || txt.includes(q);

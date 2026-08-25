@@ -226,6 +226,13 @@
     text-decoration:none;
   }
   .fuente-card a.btn-pdf:hover{background:var(--azul-marino-claro); text-decoration:none}
+  .fuente-card a.btn-lectura{
+    display:inline-block; background:#fff; color:var(--azul-marino);
+    padding:.65rem 1.2rem; border-radius:999px; font-weight:700; font-size:.92rem;
+    text-decoration:none; border:1px solid var(--azul-marino);
+  }
+  .fuente-card a.btn-lectura:hover{background:var(--azul-marino); color:#fff; text-decoration:none}
+  .fuente-card .acciones{display:flex; flex-wrap:wrap; gap:.55rem .75rem; align-items:center}
 
   .bando-card{
     background:linear-gradient(135deg, var(--azul-marino), var(--azul-marino-claro));
@@ -307,8 +314,11 @@
   <div class="fuente-card" id="codigo">
     <span class="etiqueta-fuente">Ordenamiento vigente</span>
     <h3>Código Municipal de Pabellón de Arteaga (versión 2024)</h3>
-    <p>Es el ordenamiento municipal vigente del cual se derivan el Bando y los 11 reglamentos nuevos: cada uno tomó y reorganizó las partes que le correspondían. Aquí puedes consultarlo o descargarlo completo.</p>
-    <a class="btn-pdf" href="pdfs/Codigo_Municipal_v2024.pdf" target="_blank" rel="noopener">📄 Descargar PDF completo</a>
+    <p>Es el ordenamiento municipal vigente del cual se derivan el Bando y los 11 reglamentos nuevos: cada uno tomó y reorganizó las partes que le correspondían. Puedes leerlo artículo por artículo (solo consulta) o descargar el PDF completo.</p>
+    <div class="acciones">
+      <a class="btn-lectura" href="lectura.html?doc=codigo">Leer el Código →</a>
+      <a class="btn-pdf" href="pdfs/Codigo_Municipal_v2024.pdf" target="_blank" rel="noopener">📄 Descargar PDF completo</a>
+    </div>
   </div>
 
   <div class="bando-card" id="bando">
@@ -749,11 +759,12 @@ function buscarCodigoMunicipal() {
     `<div class="sin-hits" style="margin-bottom:.5rem">Artículo <b>${escapeHtml(num)}</b> del Código Municipal 2024 quedó en:</div>` +
     hits.map((h) => {
       const href = `lectura.html?doc=${encodeURIComponent(h.doc)}#art-${encodeURIComponent(String(h.articulo).replace(/[^\w.-]+/g, "-"))}`;
+      const hrefCodigo = `lectura.html?doc=codigo#art-${encodeURIComponent(String(num).replace(/[^\w.-]+/g, "-"))}`;
       const nota = h.tipo === "tematico"
         ? ` <span style="color:var(--texto-sec);font-size:.85rem">(origen temático en el Bando)</span>`
         : "";
       return `<div class="codigo-hit">
-        Artículo ${escapeHtml(num)} del Código Municipal 2024 → ahora es el
+        <a href="${hrefCodigo}">Artículo ${escapeHtml(num)}</a> del Código Municipal 2024 → ahora es el
         <a href="${href}">Artículo ${escapeHtml(String(h.articulo))}</a>
         del <strong>${escapeHtml(h.reglamento)}</strong>${nota}
       </div>`;
