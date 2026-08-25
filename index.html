@@ -396,7 +396,15 @@ function formatTextoLegal(texto){
       s = s.replace(/(?:,\s*)?y\s+((?:[IVXLCDM]+|\d+)\.-)/gi, '</li></ul> $1');
       s = s.replace(/\.\s+((?:[IVXLCDM]+|\d+)\.-)/g, '.</li></ul> $1');
       s = s.replace(/;\s+((?:[IVXLCDM]+|\d+)\.-)/g, '</li></ul> $1');
-      s = s.replace(/(<\/p><p class="seccion-titulo">)/g, '</li></ul>$1');
+      // Cerrar listas abiertas solo donde haga falta (antes de Sección o al final)
+      s = s.split('</p><p class="seccion-titulo">').map((part, i, arr) => {
+        if (i === arr.length - 1) return part;
+        const opens = (part.match(/<ul class="incisos">/g) || []).length;
+        const closes = (part.match(/<\/ul>/g) || []).length;
+        let p = part;
+        for (let j = 0; j < opens - closes; j++) p += '</li></ul>';
+        return p;
+      }).join('</p><p class="seccion-titulo">');
       const opens = (s.match(/<ul class="incisos">/g) || []).length;
       const closes = (s.match(/<\/ul>/g) || []).length;
       for (let i = 0; i < opens - closes; i++) s += '</li></ul>';
