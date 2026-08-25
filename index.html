@@ -41,14 +41,21 @@
     border-radius:8px; background:#fff; padding:5px 9px;
   }
   header .icono{font-size:2rem; margin-bottom:.35rem}
-  .badge{
-    display:inline-block; background:rgba(255,255,255,.16); padding:.25rem .8rem;
-    border-radius:999px; font-size:.8rem; letter-spacing:.03em; margin-bottom:.7rem;
+  .eyebrow{
+    display:block; margin:0 auto .45rem; color:#fff;
+    font-size:.72rem; font-weight:700; letter-spacing:.18em;
+    text-transform:uppercase;
   }
-  header h1{margin:.2rem 0; font-size:1.75rem; font-weight:800}
-  header .marca{margin:.35rem auto 0; max-width:640px; color:#dbe8f5; font-size:.95rem; font-weight:500}
-  header p{max-width:640px; margin:.7rem auto 0; color:#dbe8f5; font-size:1rem}
-  header .ayto{margin-top:.85rem; font-size:.88rem; color:#aecbe6}
+  .badge{
+    display:inline-block; background:rgba(255,255,255,.22); color:#fff;
+    padding:.45rem 1.05rem; border-radius:999px;
+    font-size:.92rem; font-weight:700; letter-spacing:.04em;
+    margin-bottom:.85rem; border:1px solid rgba(255,255,255,.28);
+  }
+  header h1{margin:.2rem 0; font-size:1.75rem; font-weight:800; color:#fff}
+  header .marca{margin:.35rem auto 0; max-width:640px; color:#fff; font-size:.95rem; font-weight:500; opacity:.95}
+  header p.desc{max-width:640px; margin:.7rem auto 0; color:#fff; font-size:1rem; opacity:.95}
+  header .ayto{margin-top:.85rem; font-size:.88rem; color:#fff; opacity:.88}
   .kid-toggle{
     margin-top:1.1rem; background:#fff; color:var(--azul-marino); border:none;
     padding:.55rem 1.1rem; border-radius:999px; font-weight:700; cursor:pointer;
@@ -184,10 +191,11 @@
 <header>
   <img class="logo-ayto" src="logo_ayuntamiento.jpg" alt="H. Ayuntamiento de Pabellón de Arteaga" width="180" height="64" />
   <div class="icono">🌿</div>
-  <span class="badge">Consulta pública · agosto 2026</span>
+  <span class="eyebrow">Participación ciudadana</span>
+  <span class="badge">📢 CONSULTA PÚBLICA</span>
   <h1>Reglamentos nuevos de Pabellón de Arteaga</h1>
   <p class="marca">IMBIO — Instituto Municipal de Biodiversidad y Protección Ambiental</p>
-  <p>El municipio está actualizando el Bando de Policía y Buen Gobierno y sus 11 reglamentos. Aquí puedes leerlos en lenguaje sencillo, buscar artículos reales por tema, y mandarnos tus dudas u observaciones.</p>
+  <p class="desc">Tu opinión es parte del proceso: el municipio está actualizando el Bando de Policía y Buen Gobierno y sus 11 reglamentos. Aquí puedes leerlos en lenguaje sencillo, buscar artículos reales por tema y enviar tus dudas u observaciones.</p>
   <div class="ayto">H. Ayuntamiento de Pabellón de Arteaga</div>
   <button class="kid-toggle" onclick="toggleKid()" id="kidBtn">🧒 Modo fácil</button>
 </header>
