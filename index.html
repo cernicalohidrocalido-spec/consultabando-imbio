@@ -87,15 +87,24 @@
   #resultado{margin-top:1.1rem}
   .respuesta-ia{
     background:var(--verde-claro); border-radius:12px; padding:.9rem 1rem; margin-bottom:.9rem;
-    font-size:.98rem; white-space:pre-wrap;
+    font-size:.98rem; line-height:1.55; color:var(--texto);
   }
-  .respuesta-ia .etiqueta{font-size:.75rem; text-transform:uppercase; letter-spacing:.04em; color:var(--verde-oscuro); font-weight:700; display:block; margin-bottom:.35rem}
+  .respuesta-ia .etiqueta{font-size:.75rem; text-transform:uppercase; letter-spacing:.04em; color:var(--verde-oscuro); font-weight:700; display:block; margin-bottom:.45rem}
+  .respuesta-ia p{margin:0 0 .7rem}
+  .respuesta-ia p:last-child{margin-bottom:0}
+  .respuesta-ia strong{font-weight:700; color:var(--azul-marino)}
   .articulo-hit{
     border:1px solid var(--borde); border-left:4px solid var(--verde); border-radius:10px;
     padding:.9rem 1rem; margin-bottom:.75rem; background:var(--card);
   }
   .articulo-hit .meta{font-size:.8rem; color:var(--azul-marino); font-weight:700; margin-bottom:.55rem; line-height:1.35}
   .articulo-hit .texto{font-size:.95rem; color:var(--texto); line-height:1.55}
+  .articulo-hit .btn-opinar{
+    display:inline-block;margin-top:.75rem;padding:.4rem .75rem;font-size:.82rem;font-weight:600;
+    color:var(--azul-marino);background:var(--verde-claro);border:1px solid var(--borde);
+    border-radius:999px;cursor:pointer;font-family:inherit;
+  }
+  .articulo-hit .btn-opinar:hover{background:var(--azul-marino);color:#fff;border-color:var(--azul-marino)}
   .articulo-hit .texto-p{margin:0 0 .7rem}
   .articulo-hit .texto-p:last-child{margin-bottom:0}
   .articulo-hit .seccion-titulo{
@@ -408,10 +417,39 @@ function llenarSelectReglamentos(){
 }
 function abrirFormularioReglamento(docId){
   const reg = nombreLegalDe(docId);
-  if (reg) document.getElementById("obsReglamento").value = reg;
-  document.getElementById("obsArticulo").value = "";
+  abrirFormularioObservacion(reg, "");
+}
+function abrirFormularioObservacion(reglamento, articulo){
+  const form = document.getElementById("formObservacion");
+  if (form) form.hidden = false;
+  const msg = document.getElementById("obsMsg");
+  if (msg) { msg.hidden = true; msg.textContent = ""; }
+  const btn = document.getElementById("obsEnviar");
+  if (btn) btn.disabled = false;
+  if (reglamento) document.getElementById("obsReglamento").value = reglamento;
+  document.getElementById("obsArticulo").value = articulo ? String(articulo) : "";
   document.getElementById("consulta").scrollIntoView({ behavior: "smooth", block: "start" });
   document.getElementById("obsComentario").focus();
+}
+
+/** Formato ligero de la respuesta del asistente (**negrita** y párrafos). */
+function formatRespuestaIA(texto) {
+  let s = escapeHtml(String(texto || "").trim());
+  s = s.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  return s
+    .split(/\n{2,}/)
+    .map((p) => `<p>${p.replace(/\n/g, "<br>")}</p>`)
+    .join("");
+}
+
+function hitHTML(h) {
+  return `<div class="articulo-hit">
+      <div class="meta">${escapeHtml(h.reglamento)} — Artículo ${escapeHtml(String(h.articulo))}</div>
+      <div class="texto">${formatTextoLegal(h.texto)}</div>
+      <button type="button" class="btn-opinar"
+        data-reglamento="${escapeHtml(h.reglamento)}"
+        data-articulo="${escapeHtml(String(h.articulo))}">💬 Opinar sobre este artículo</button>
+    </div>`;
 }
 function tarjetaHTML(r){
   return `<div class="tarjeta" style="border-top:4px solid ${r.color}">
@@ -532,12 +570,8 @@ async function preguntar(){
   }
 
   // Muestra siempre los artículos reales encontrados (sin IA, funciona siempre)
-  let html = `<div class="sin-hits" style="margin-bottom:.5rem">Se encontraron <b>${hits.length}</b> artículo(s) relacionados (texto real de los reglamentos).</div>` + hits.map(h => `
-    <div class="articulo-hit">
-      <div class="meta">${escapeHtml(h.reglamento)} — Artículo ${escapeHtml(String(h.articulo))}</div>
-      <div class="texto">${formatTextoLegal(h.texto)}</div>
-    </div>
-  `).join("");
+  let html = `<div class="sin-hits" style="margin-bottom:.5rem">Se encontraron <b>${hits.length}</b> artículo(s) relacionados (texto real de los reglamentos).</div>` +
+    hits.map(hitHTML).join("");
 
   // Si hay Worker de Cloudflare configurado, pide además una respuesta en lenguaje natural
   if(ASISTENTE_URL){
@@ -552,7 +586,7 @@ async function preguntar(){
       });
       if(resp.ok){
         const data = await resp.json();
-        html = `<div class="respuesta-ia"><span class="etiqueta">Respuesta</span>${data.respuesta}</div>` + html;
+        html = `<div class="respuesta-ia"><span class="etiqueta">Respuesta</span>${formatRespuestaIA(data.respuesta)}</div>` + html;
       }
     }catch(e){
       // Si el asistente falla, igual mostramos los artículos reales encontrados arriba.
@@ -565,6 +599,12 @@ async function preguntar(){
 
 document.getElementById("pregunta").addEventListener("keydown", e=>{
   if(e.key==="Enter") preguntar();
+});
+
+document.getElementById("resultado").addEventListener("click", (e) => {
+  const btn = e.target.closest(".btn-opinar");
+  if (!btn) return;
+  abrirFormularioObservacion(btn.dataset.reglamento || "", btn.dataset.articulo || "");
 });
 
 document.getElementById("formObservacion").addEventListener("submit", async (e) => {
