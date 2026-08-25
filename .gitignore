@@ -6,6 +6,7 @@
 # Duplicados de trabajo local
 index_1.html
 articulos_1.json
+scripts/_docx_freeze_tmp/
 
 # Node / Wrangler
 node_modules/
