@@ -274,6 +274,12 @@ const SINONIMOS = {
   fiesta: ["evento", "espectáculo", "feria", "baile"],
   tránsito: ["movilidad", "vialidad", "circulación", "vehículo"],
   árboles: ["arbolado", "vegetación", "poda", "forestal"],
+  // El texto legal usa sobre todo "trabajo sexual"; la ciudadanía busca "prostitución"
+  prostitución: ["trabajo sexual", "prostituta", "prostitutas", "zona de tolerancia"],
+  prostitucion: ["trabajo sexual", "prostituta", "prostitutas", "zona de tolerancia"],
+  prostituta: ["trabajo sexual", "prostitución", "zona de tolerancia"],
+  prostitutas: ["trabajo sexual", "prostitución", "zona de tolerancia"],
+  "trabajo sexual": ["prostitución", "prostituta", "zona de tolerancia"],
 };
 
 let ARTICULOS = [];
@@ -333,35 +339,56 @@ function toggleKid(){
 
 /* ---------- Buscador de artículos reales ---------- */
 function expandirPalabras(q){
-  const palabras = q.toLowerCase()
-    .normalize("NFD").replace(/[̀-ͯ]/g,"") // quita acentos para comparar
+  const qNorm = normaliza(q)
     .replace(/[¿?¡!.,;:]/g,"")
+    .replace(/\s+/g," ")
+    .trim();
+  const palabras = qNorm
     .split(/\s+/)
     .filter(w => w.length > 2 && !["que","quien","donde","como","para","los","las","del","una","con","por"].includes(w));
   const set = new Set(palabras);
+  const originales = new Set(palabras);
+
+  for(let i=0;i<palabras.length-1;i++){
+    const frase = palabras[i]+" "+palabras[i+1];
+    set.add(frase);
+    originales.add(frase);
+  }
+
   for(const [base, syns] of Object.entries(SINONIMOS)){
-    const baseSin = base.normalize("NFD").replace(/[̀-ͯ]/g,"");
-    if(palabras.includes(baseSin)){
-      syns.forEach(s => set.add(s.normalize("NFD").replace(/[̀-ͯ]/g,"")));
+    const baseSin = normaliza(base);
+    const coincide =
+      qNorm.includes(baseSin) ||
+      palabras.some(p => p === baseSin || (baseSin.length >= 5 && (p.startsWith(baseSin.slice(0,5)) || baseSin.startsWith(p.slice(0,5)))));
+    if(coincide){
+      set.add(baseSin);
+      syns.forEach(s => set.add(normaliza(s)));
     }
   }
-  return [...set];
+  return { terminos: [...set], originales };
 }
-function normaliza(s){ return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,""); }
+function normaliza(s){ return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,""); }
 
-function buscarArticulos(pregunta, maxResultados=6){
-  const palabras = expandirPalabras(pregunta);
-  if(palabras.length===0) return [];
+function buscarArticulos(pregunta, maxResultados=15){
+  const { terminos, originales } = expandirPalabras(pregunta);
+  if(terminos.length===0) return [];
   const puntuados = [];
   for(const a of ARTICULOS){
     const txt = normaliza(a.texto);
     let score = 0;
-    for(const p of palabras){
-      if(txt.includes(p)) score += 1;
+    let matchOriginal = false;
+    for(const p of terminos){
+      if(!txt.includes(p)) continue;
+      if(originales.has(p)){
+        score += p.includes(" ") ? 6 : 5;
+        matchOriginal = true;
+      } else {
+        score += p.includes(" ") ? 4 : (p.length >= 8 ? 2 : 1);
+      }
     }
-    if(score>0) puntuados.push({...a, score});
+    if(score>0) puntuados.push({...a, score, matchOriginal});
   }
-  puntuados.sort((a,b)=> b.score - a.score);
+  puntuados.sort((a,b)=> b.score - a.score || (b.matchOriginal-a.matchOriginal) || Number(a.articulo) - Number(b.articulo));
   return puntuados.slice(0, maxResultados);
 }
 
@@ -457,7 +484,7 @@ async function preguntar(){
   }
 
   // Muestra siempre los artículos reales encontrados (sin IA, funciona siempre)
-  let html = hits.map(h => `
+  let html = `<div class="sin-hits" style="margin-bottom:.5rem">Se encontraron <b>${hits.length}</b> artículo(s) relacionados (texto real de los reglamentos).</div>` + hits.map(h => `
     <div class="articulo-hit">
       <div class="meta">${escapeHtml(h.reglamento)} — Artículo ${escapeHtml(String(h.articulo))}</div>
       <div class="texto">${formatTextoLegal(h.texto)}</div>
