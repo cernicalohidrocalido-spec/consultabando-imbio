@@ -651,16 +651,22 @@ function filtrar(){
     input.value = "";
     q = "";
   }
+  // Palabras que aplican a todos los derivados (si solo vienen esas, no filtrar).
+  const genericos = new Set(["reglamento", "reglamentos", "derivado", "derivados", "municipal", "municipio"]);
+  const tokens = q.split(/\s+/).filter(Boolean);
+  const significativos = tokens.filter((t) => !genericos.has(t));
+  const qFiltro = significativos.join(" ");
+
   let lista = reglamentosDerivados().filter(r => categoriaActual==="Todos" || r.categoria===categoriaActual);
-  if(q){
+  if (qFiltro) {
     lista = lista.filter(r =>
-      r.titulo.toLowerCase().includes(q) ||
-      r.resumen.toLowerCase().includes(q) ||
-      r.kid.toLowerCase().includes(q) ||
-      r.categoria.toLowerCase().includes(q)
+      r.titulo.toLowerCase().includes(qFiltro) ||
+      r.resumen.toLowerCase().includes(qFiltro) ||
+      r.kid.toLowerCase().includes(qFiltro) ||
+      r.categoria.toLowerCase().includes(qFiltro)
     );
   }
-  const busquedaActiva = q.length > 0 || categoriaActual !== "Todos";
+  const busquedaActiva = qFiltro.length > 0 || categoriaActual !== "Todos";
   render(lista, busquedaActiva);
 }
 
