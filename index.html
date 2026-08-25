@@ -203,10 +203,19 @@
 <main>
 
   <div class="pasos">
-    <div class="paso"><b>1. Explora</b>Elige un reglamento o busca un tema (por ejemplo "tianguis" o "ruido").</div>
-    <div class="paso"><b>2. Pregunta</b>Escribe tu duda en la caja de búsqueda y te mostramos los artículos reales que aplican.</div>
-    <div class="paso"><b>3. Opina</b>Manda tu observación directamente al IMBIO con el botón de contacto.</div>
+    <div class="paso"><b>1. Explora</b>Abre el reglamento que te afecta (tarjetas abajo) y léelo artículo por artículo.</div>
+    <div class="paso"><b>2. Pregunta</b>Si no sabes en cuál buscar, escribe un tema (por ejemplo "tianguis" o "ruido") y te mostramos los artículos reales.</div>
+    <div class="paso"><b>3. Opina</b>Desde cualquier artículo, o con el botón de contacto, manda tu observación al IMBIO.</div>
   </div>
+
+  <h2 class="sec">📚 Los 12 documentos</h2>
+  <div class="controles">
+    <input id="buscador" type="text" placeholder="Filtrar por palabra..." oninput="filtrar()" />
+  </div>
+  <div class="chips" id="chips"></div>
+  <div id="contador"></div>
+  <div class="grid" id="grid"></div>
+  <div class="sin-resultados" id="sinResultados">No encontramos reglamentos con esa búsqueda. Intenta con otra palabra.</div>
 
   <section class="asistente">
     <h2>🔍 Pregúntale a los reglamentos</h2>
@@ -224,15 +233,6 @@
     </div>
     <div id="resultado"></div>
   </section>
-
-  <h2 class="sec">📚 Los 12 documentos</h2>
-  <div class="controles">
-    <input id="buscador" type="text" placeholder="Filtrar por palabra..." oninput="filtrar()" />
-  </div>
-  <div class="chips" id="chips"></div>
-  <div id="contador"></div>
-  <div class="grid" id="grid"></div>
-  <div class="sin-resultados" id="sinResultados">No encontramos reglamentos con esa búsqueda. Intenta con otra palabra.</div>
 
   <div class="cta" id="consulta">
     <h2 style="margin-top:0">✍️ ¿Tienes una duda u observación?</h2>
