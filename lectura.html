@@ -118,12 +118,15 @@
     border:none;border-radius:999px;font-weight:700;font-size:.92rem;cursor:pointer;
   }
   .form-inline button[type="submit"]:hover{background:var(--verde-oscuro)}
+  .form-inline button[type="submit"]:disabled{opacity:.65;cursor:wait}
   .form-ok{
     padding:.85rem;background:var(--verde-claro);border-radius:10px;
     color:var(--azul-marino);font-size:.92rem;
   }
-  .submit-frame{display:none;width:0;height:0;border:none}
-  @media (max-width:520px){.form-row-2{grid-template-columns:1fr}}
+  .form-err{
+    margin-top:.5rem;padding:.65rem .75rem;background:#fff3f0;border-radius:8px;
+    color:#8a2b1a;font-size:.85rem;border:1px solid #f0c2b8;
+  }
   .articulo .fracciones,.articulo .incisos{margin:.35rem 0 .8rem;padding:0;list-style:none}
   .articulo .fracciones li{
     margin:.4rem 0;padding:.5rem .7rem;border-left:3px solid var(--verde);
@@ -181,9 +184,7 @@
 
 <script src="js/formato-legal.js"></script>
 <script>
-const FORM_URL = "https://form.jotform.com/262358713140049";
-const FORM_SUBMIT = "https://submit.jotform.com/submit/262358713140049";
-const FORM_ID = "262358713140049";
+const OBSERVACIONES_URL = "https://observaciones.imbio.info/enviar";
 const BTN_OPINAR = "💬 Opinar sobre este artículo";
 
 const CATALOGO = {
@@ -226,44 +227,27 @@ function renderError(msg) {
 
 function formPanelHtml(a) {
   const id = slugArt(a.articulo);
-  const regVal = escapeHtml(a.reglamento);
   const artVal = escapeHtml(String(a.articulo));
-  const frameName = `jf_${id}`;
   return `<div class="form-panel" hidden>
     <p class="form-panel-hint">Tu observación se envía al IMBIO y queda ligada a este artículo.</p>
     <p class="ctx"><strong>${escapeHtml(a.reglamento)}</strong> · Artículo ${artVal}</p>
     <div class="form-ok" hidden>Gracias. Tu observación fue enviada y será revisada por el IMBIO.</div>
-    <form class="form-inline" method="post" action="${FORM_SUBMIT}" target="${frameName}" data-art-form="${id}">
-      <input type="hidden" name="formID" value="${FORM_ID}" />
-      <input type="hidden" name="simple_spc" value="${FORM_ID}-${FORM_ID}" />
-      <input type="hidden" name="q5_q5_dropdown3" value="${regVal}" />
-      <input type="hidden" name="q6_q6_textbox4" value="${artVal}" />
-      <input type="hidden" name="submitSource" value="embedded" />
-      <div class="form-row-2">
-        <div>
-          <label for="first_${id}">Nombre <span class="hint">(opcional)</span></label>
-          <input type="text" id="first_${id}" name="q2_q2_name0[first]" autocomplete="given-name" />
-        </div>
-        <div>
-          <label for="last_${id}">Apellido <span class="hint">(opcional)</span></label>
-          <input type="text" id="last_${id}" name="q2_q2_name0[last]" autocomplete="family-name" />
-        </div>
+    <form class="form-inline" data-art-form="${id}" data-reglamento="${escapeHtml(a.reglamento)}" data-articulo="${artVal}">
+      <div>
+        <label for="nombre_${id}">Nombre <span class="hint">(opcional)</span></label>
+        <input type="text" id="nombre_${id}" name="nombre" autocomplete="name" maxlength="200" />
       </div>
       <div>
-        <label for="email_${id}">Correo electrónico <span class="hint">(opcional)</span></label>
-        <input type="email" id="email_${id}" name="q3_q3_email1" autocomplete="email" />
-      </div>
-      <div>
-        <label for="phone_${id}">Teléfono de contacto <span class="hint">(opcional)</span></label>
-        <input type="tel" id="phone_${id}" name="q4_q4_phone2[full]" autocomplete="tel" placeholder="(000) 000-0000" />
+        <label for="contacto_${id}">Contacto <span class="hint">(correo o teléfono, opcional)</span></label>
+        <input type="text" id="contacto_${id}" name="contacto" autocomplete="email" maxlength="200" />
       </div>
       <div>
         <label for="msg_${id}">Tu duda, comentario u observación</label>
-        <textarea id="msg_${id}" name="q7_q7_textarea5" required placeholder="Escribe aquí tu observación sobre este artículo…"></textarea>
+        <textarea id="msg_${id}" name="comentario" required maxlength="5000" placeholder="Escribe aquí tu observación sobre este artículo…"></textarea>
       </div>
       <button type="submit">Enviar observación</button>
+      <div class="form-err" hidden></div>
     </form>
-    <iframe class="submit-frame" name="${frameName}" title="Envío de formulario"></iframe>
   </div>`;
 }
 
@@ -277,7 +261,9 @@ function toggleFormPanel(btn) {
       p.hidden = true;
       const ok = p.querySelector(".form-ok");
       const f = p.querySelector(".form-inline");
+      const err = p.querySelector(".form-err");
       if (ok && f) { ok.hidden = true; f.hidden = false; }
+      if (err) { err.hidden = true; err.textContent = ""; }
     }
   });
   document.querySelectorAll(".articulo .btn-opinar").forEach((b) => {
@@ -300,15 +286,47 @@ function toggleFormPanel(btn) {
   setTimeout(() => panel.scrollIntoView({ behavior: "smooth", block: "nearest" }), 80);
 }
 
-function onFormSubmit(form) {
+async function onFormSubmit(e) {
+  e.preventDefault();
+  const form = e.target.closest(".form-inline");
+  if (!form) return;
   const panel = form.closest(".form-panel");
-  const frame = panel.querySelector(".submit-frame");
-  frame.onload = () => {
+  const err = form.querySelector(".form-err");
+  const btn = form.querySelector('button[type="submit"]');
+  const comentario = (form.querySelector('[name="comentario"]')?.value || "").trim();
+  err.hidden = true;
+  err.textContent = "";
+  if (!comentario) {
+    err.hidden = false;
+    err.textContent = "Escribe tu duda, comentario u observación antes de enviar.";
+    return;
+  }
+  const payload = {
+    nombre: (form.querySelector('[name="nombre"]')?.value || "").trim(),
+    contacto: (form.querySelector('[name="contacto"]')?.value || "").trim(),
+    reglamento: form.dataset.reglamento || "",
+    articulo: form.dataset.articulo || "",
+    comentario,
+  };
+  btn.disabled = true;
+  try {
+    const resp = await fetch(OBSERVACIONES_URL, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok || !data.ok) throw new Error(data.error || "Error");
     form.hidden = true;
     panel.querySelector(".form-ok").hidden = false;
     panel.querySelector(".form-panel-hint").hidden = true;
     panel.querySelector(".ctx").hidden = true;
-  };
+    panel.querySelector(".form-ok").textContent = data.mensaje || "Gracias, tu observación fue recibida.";
+  } catch {
+    err.hidden = false;
+    err.textContent = "No pudimos enviar tu observación. Revisa tu conexión e intenta de nuevo en un momento.";
+    btn.disabled = false;
+  }
 }
 
 async function init() {
@@ -365,10 +383,7 @@ async function init() {
     const btn = e.target.closest(".btn-opinar");
     if (btn) toggleFormPanel(btn);
   });
-  cuerpo.addEventListener("submit", (e) => {
-    const form = e.target.closest(".form-inline");
-    if (form) onFormSubmit(form);
-  });
+  cuerpo.addEventListener("submit", onFormSubmit);
 
   if (hashArt) {
     const el = document.getElementById("art-" + hashArt);

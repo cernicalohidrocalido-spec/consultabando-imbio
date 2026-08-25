@@ -176,8 +176,28 @@
   .sin-resultados{display:none; text-align:center; color:var(--texto-sec); padding:1.5rem}
 
   .cta{
-    margin-top:2rem; background:var(--verde-claro); border-radius:16px; padding:1.4rem; text-align:center;
+    margin-top:2rem; background:var(--verde-claro); border-radius:16px; padding:1.4rem; text-align:left;
   }
+  .cta h2{text-align:center}
+  .cta > p{text-align:center}
+  .cta .form-obs{
+    display:grid; gap:.65rem; max-width:520px; margin:1rem auto 0;
+  }
+  .cta .form-obs label{font-size:.82rem; font-weight:600; color:var(--texto)}
+  .cta .form-obs .hint{font-weight:400; color:var(--texto-sec); font-size:.75rem}
+  .cta .form-obs input,.cta .form-obs select,.cta .form-obs textarea{
+    width:100%; padding:.55rem .65rem; border:1px solid var(--borde); border-radius:8px;
+    font-size:.92rem; font-family:inherit; background:#fff; color:var(--texto);
+  }
+  .cta .form-obs textarea{min-height:110px; resize:vertical}
+  .cta .form-obs button[type="submit"]{
+    margin-top:.25rem; padding:.7rem 1.4rem; background:var(--verde); color:#fff;
+    border:none; border-radius:999px; font-weight:700; font-size:.95rem; cursor:pointer;
+  }
+  .cta .form-obs button[type="submit"]:disabled{opacity:.65; cursor:wait}
+  .cta .form-msg{margin-top:.75rem; padding:.75rem; border-radius:10px; font-size:.92rem; text-align:center}
+  .cta .form-msg.ok{background:#fff; color:var(--azul-marino); border:1px solid var(--borde)}
+  .cta .form-msg.err{background:#fff3f0; color:#8a2b1a; border:1px solid #f0c2b8}
   .cta a.boton{
     display:inline-block; margin-top:.6rem; background:var(--verde); color:#fff;
     padding:.7rem 1.4rem; border-radius:999px; font-weight:700; text-decoration:none;
@@ -237,7 +257,32 @@
   <div class="cta" id="consulta">
     <h2 style="margin-top:0">✍️ ¿Tienes una duda u observación?</h2>
     <p>Cuéntanos qué piensas de los reglamentos. Todas las observaciones se revisan antes de presentar el paquete a Cabildo.</p>
-    <a class="boton" id="linkFormGeneral" href="#" target="_blank" rel="noopener">Enviar mi duda u observación</a>
+    <form class="form-obs" id="formObservacion" novalidate>
+      <div>
+        <label for="obsNombre">Nombre <span class="hint">(opcional)</span></label>
+        <input type="text" id="obsNombre" name="nombre" autocomplete="name" maxlength="200" />
+      </div>
+      <div>
+        <label for="obsContacto">Contacto <span class="hint">(correo o teléfono, opcional)</span></label>
+        <input type="text" id="obsContacto" name="contacto" autocomplete="email" maxlength="200" />
+      </div>
+      <div>
+        <label for="obsReglamento">Reglamento</label>
+        <select id="obsReglamento" name="reglamento">
+          <option value="">No estoy seguro / aplica a varios</option>
+        </select>
+      </div>
+      <div>
+        <label for="obsArticulo">Número de artículo <span class="hint">(si aplica)</span></label>
+        <input type="text" id="obsArticulo" name="articulo" maxlength="60" placeholder="Ej. 12" />
+      </div>
+      <div>
+        <label for="obsComentario">Tu duda, comentario u observación</label>
+        <textarea id="obsComentario" name="comentario" required maxlength="5000" placeholder="Escribe aquí tu observación…"></textarea>
+      </div>
+      <button type="submit" id="obsEnviar">Enviar mi duda u observación</button>
+    </form>
+    <div class="form-msg" id="obsMsg" hidden></div>
   </div>
 
 </main>
@@ -253,7 +298,7 @@
    CONFIGURACIÓN — edita estas dos líneas cuando tengas listos
    el formulario y el Worker de Cloudflare.
    ============================================================ */
-const FORM_URL = "https://form.jotform.com/262358713140049";
+const OBSERVACIONES_URL = "https://observaciones.imbio.info/enviar";
 // URL del Worker de Cloudflare (ver worker.js). Déjalo vacío ("")
 // para que la búsqueda funcione SOLO con el texto real (sin IA)
 // mientras despliegas el Worker.
@@ -328,7 +373,7 @@ let cargaError = false;
 
 fetch("data/articulos.json")
   .then(r => r.json())
-  .then(d => { ARTICULOS = d; })
+  .then(d => { ARTICULOS = d; llenarSelectReglamentos(); })
   .catch(() => { cargaError = true; });
 
 /* ---------- Tarjetas de reglamentos ---------- */
@@ -344,7 +389,30 @@ function setCategoria(c){
   document.querySelectorAll(".chip").forEach(b=>b.classList.toggle("activo", b.dataset.cat===c));
   filtrar();
 }
-function formLinkFor(r){ return r.formUrl || FORM_URL; }
+function nombreLegalDe(docId){
+  const a = ARTICULOS.find(x => x.doc === docId);
+  return a ? a.reglamento : "";
+}
+function llenarSelectReglamentos(){
+  const sel = document.getElementById("obsReglamento");
+  const vistos = new Set();
+  const opts = [];
+  for (const a of ARTICULOS) {
+    if (vistos.has(a.reglamento)) continue;
+    vistos.add(a.reglamento);
+    opts.push(a.reglamento);
+  }
+  opts.sort((x,y)=>x.localeCompare(y,"es"));
+  sel.innerHTML = `<option value="">No estoy seguro / aplica a varios</option>` +
+    opts.map(r => `<option value="${r.replace(/"/g,"&quot;")}">${r}</option>`).join("");
+}
+function abrirFormularioReglamento(docId){
+  const reg = nombreLegalDe(docId);
+  if (reg) document.getElementById("obsReglamento").value = reg;
+  document.getElementById("obsArticulo").value = "";
+  document.getElementById("consulta").scrollIntoView({ behavior: "smooth", block: "start" });
+  document.getElementById("obsComentario").focus();
+}
 function tarjetaHTML(r){
   return `<div class="tarjeta" style="border-top:4px solid ${r.color}">
     <div class="icono">${r.icono}</div>
@@ -353,7 +421,7 @@ function tarjetaHTML(r){
     <p class="kid">${r.kid}</p>
     <div class="acciones">
       <a class="enlace-lectura" href="lectura.html?doc=${r.id}">Leer el reglamento →</a>
-      <a class="enlace" href="${formLinkFor(r)}" target="_blank" rel="noopener">Enviar duda sobre este reglamento →</a>
+      <button type="button" class="enlace" style="background:none;border:none;padding:0;cursor:pointer;font:inherit;text-align:left;color:var(--azul-marino-claro)" onclick="abrirFormularioReglamento('${r.id}')">Enviar duda sobre este reglamento →</button>
     </div>
   </div>`;
 }
@@ -499,8 +567,49 @@ document.getElementById("pregunta").addEventListener("keydown", e=>{
   if(e.key==="Enter") preguntar();
 });
 
+document.getElementById("formObservacion").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const msg = document.getElementById("obsMsg");
+  const btn = document.getElementById("obsEnviar");
+  const comentario = document.getElementById("obsComentario").value.trim();
+  if (!comentario) {
+    msg.hidden = false;
+    msg.className = "form-msg err";
+    msg.textContent = "Escribe tu duda, comentario u observación antes de enviar.";
+    return;
+  }
+  const payload = {
+    nombre: document.getElementById("obsNombre").value.trim(),
+    contacto: document.getElementById("obsContacto").value.trim(),
+    reglamento: document.getElementById("obsReglamento").value.trim(),
+    articulo: document.getElementById("obsArticulo").value.trim(),
+    comentario,
+  };
+  btn.disabled = true;
+  msg.hidden = true;
+  try {
+    const resp = await fetch(OBSERVACIONES_URL, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok || !data.ok) {
+      throw new Error(data.error || "Error al enviar");
+    }
+    document.getElementById("formObservacion").hidden = true;
+    msg.hidden = false;
+    msg.className = "form-msg ok";
+    msg.textContent = data.mensaje || "Gracias, tu observación fue recibida.";
+  } catch {
+    msg.hidden = false;
+    msg.className = "form-msg err";
+    msg.textContent = "No pudimos enviar tu observación. Revisa tu conexión e intenta de nuevo en un momento.";
+    btn.disabled = false;
+  }
+});
+
 /* ---------- Inicialización ---------- */
-document.getElementById("linkFormGeneral").href = FORM_URL;
 chipHTML();
 render(REGLAMENTOS);
 </script>

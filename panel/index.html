@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Panel de Observaciones — Consulta Pública IMBIO</title>
+<style>
+  :root{ --azul:#14355e; --verde:#2f8f5b; --bg:#f7f9fb; --borde:#e1e6ea; --texto:#1f2933; }
+  *{box-sizing:border-box}
+  body{ margin:0; background:var(--bg); color:var(--texto); font-family:system-ui, sans-serif; }
+  header{ background:var(--azul); color:#fff; padding:1.2rem 1.5rem; }
+  header h1{ margin:0; font-size:1.3rem; }
+  main{ max-width:1000px; margin:0 auto; padding:1.5rem; }
+  .barra{ display:flex; gap:.6rem; flex-wrap:wrap; margin-bottom:1rem; align-items:center; }
+  input[type=password]{ padding:.55rem .7rem; border:1px solid var(--borde); border-radius:8px; flex:1 1 220px; }
+  button{ background:var(--verde); color:#fff; border:none; padding:.55rem 1.1rem; border-radius:8px; cursor:pointer; font-weight:600; }
+  button.secundario{ background:var(--azul); }
+  #estado{ font-size:.85rem; color:#666; margin-bottom:1rem; }
+  table{ width:100%; border-collapse:collapse; background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+  th, td{ text-align:left; padding:.6rem .7rem; border-bottom:1px solid var(--borde); font-size:.88rem; vertical-align:top; }
+  th{ background:#eef2f5; }
+  tr:last-child td{ border-bottom:none; }
+  .comentario{ max-width:340px; white-space:pre-wrap; }
+</style>
+</head>
+<body>
+<header><h1>📋 Panel de Observaciones — Consulta Pública IMBIO</h1></header>
+<main>
+  <div class="barra">
+    <input type="password" id="token" placeholder="Contraseña (ADMIN_TOKEN)" />
+    <button onclick="cargar()">Ver observaciones</button>
+    <button class="secundario" onclick="exportarCSV()">Descargar CSV</button>
+  </div>
+  <div id="estado"></div>
+  <table id="tabla" style="display:none">
+    <thead>
+      <tr><th>Fecha</th><th>Nombre</th><th>Contacto</th><th>Reglamento</th><th>Artículo</th><th>Comentario</th></tr>
+    </thead>
+    <tbody id="filas"></tbody>
+  </table>
+</main>
+<script>
+  // Ajusta esta URL a la del Worker ya desplegado.
+  const WORKER_URL = "https://observaciones.imbio.info";
+
+  function guardarToken(){ sessionStorage.setItem("imbio_admin_token", document.getElementById("token").value); }
+  document.getElementById("token").value = sessionStorage.getItem("imbio_admin_token") || "";
+
+  async function cargar(){
+    const token = document.getElementById("token").value.trim();
+    guardarToken();
+    const estado = document.getElementById("estado");
+    estado.textContent = "Cargando...";
+    try{
+      const resp = await fetch(`${WORKER_URL}/panel?token=${encodeURIComponent(token)}`);
+      if(!resp.ok){ estado.textContent = "Contraseña incorrecta o error del servidor."; return; }
+      const data = await resp.json();
+      estado.textContent = `${data.total} observaciones encontradas.`;
+      const filas = document.getElementById("filas");
+      filas.innerHTML = data.observaciones.map(o => `
+        <tr>
+          <td>${o.creado_en || ""}</td>
+          <td>${escapeHtml(o.nombre)}</td>
+          <td>${escapeHtml(o.contacto)}</td>
+          <td>${escapeHtml(o.reglamento)}</td>
+          <td>${escapeHtml(o.articulo)}</td>
+          <td class="comentario">${escapeHtml(o.comentario)}</td>
+        </tr>
+      `).join("");
+      document.getElementById("tabla").style.display = data.total ? "table" : "none";
+    }catch(e){
+      estado.textContent = "No se pudo conectar con el Worker.";
+    }
+  }
+
+  function exportarCSV(){
+    const token = document.getElementById("token").value.trim();
+    guardarToken();
+    window.open(`${WORKER_URL}/exportar?token=${encodeURIComponent(token)}`, "_blank");
+  }
+
+  function escapeHtml(s){
+    return (s || "").toString()
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+</script>
+</body>
+</html>
