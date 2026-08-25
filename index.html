@@ -355,7 +355,9 @@
 
   <h2 class="sec">📚 Los 11 reglamentos derivados</h2>
   <div class="controles">
-    <input id="buscador" type="text" placeholder="Filtrar por palabra..." oninput="filtrar()" />
+    <input id="buscador" type="search" name="filtro-reglamentos" placeholder="Filtrar por palabra..."
+      autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+      aria-label="Filtrar reglamentos por palabra" oninput="filtrar()" />
   </div>
   <div class="chips" id="chips"></div>
   <div id="contador"></div>
@@ -641,7 +643,14 @@ function render(lista, busquedaActiva){
   sin.style.display = mostrarVacio ? "block" : "none";
 }
 function filtrar(){
-  const q = document.getElementById("buscador").value.trim().toLowerCase();
+  const input = document.getElementById("buscador");
+  let q = input.value.trim().toLowerCase();
+  // Autocompletado / pegado accidental del título de la sección no debe filtrar a cero.
+  const tituloSeccion = "los 11 reglamentos derivados";
+  if (q === tituloSeccion || q === "📚 " + tituloSeccion || q.replace(/^📚\s*/, "") === tituloSeccion) {
+    input.value = "";
+    q = "";
+  }
   let lista = reglamentosDerivados().filter(r => categoriaActual==="Todos" || r.categoria===categoriaActual);
   if(q){
     lista = lista.filter(r =>
@@ -653,6 +662,14 @@ function filtrar(){
   }
   const busquedaActiva = q.length > 0 || categoriaActual !== "Todos";
   render(lista, busquedaActiva);
+}
+
+function initTarjetasReglamentos(){
+  const input = document.getElementById("buscador");
+  input.value = "";
+  categoriaActual = "Todos";
+  chipHTML();
+  filtrar();
 }
 
 /* ---------- Buscador de artículos reales ---------- */
@@ -861,8 +878,13 @@ document.getElementById("formObservacion").addEventListener("submit", async (e) 
 });
 
 /* ---------- Inicialización ---------- */
-chipHTML();
-filtrar();
+initTarjetasReglamentos();
+// Si el navegador restaura el campo con texto viejo (bfcache / autocompletado), volver a pintar.
+window.addEventListener("pageshow", () => {
+  const q = document.getElementById("buscador").value.trim();
+  if (!q) initTarjetasReglamentos();
+  else filtrar();
+});
 </script>
 </body>
 </html>
