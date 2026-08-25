@@ -3,49 +3,56 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Consulta Pública — Paquete Normativo Municipal | Pabellón de Arteaga</title>
+<title>Consulta Pública — Paquete Normativo Municipal | IMBIO Pabellón de Arteaga</title>
+<meta name="theme-color" content="#002A5C" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
+    --azul-marino:#002A5C;
+    --azul-marino-claro:#0B3D75;
     --verde:#2f8f5b;
     --verde-oscuro:#1f6b42;
-    --verde-claro:#eaf7ef;
-    --azul:#2e6ea6;
+    --verde-claro:#e6f4ec;
+    --azul:#0B3D75;
     --amarillo:#f4b400;
     --naranja:#c1622a;
-    --bg:#fbfdfb;
+    --bg:#f4f6f8;
     --card:#ffffff;
-    --texto:#22301f;
-    --texto-sec:#5a6b57;
-    --borde:#e1ece2;
-    --sombra: 0 2px 10px rgba(31,107,66,.08);
-  }
-  @media (prefers-color-scheme: dark){
-    :root{
-      --bg:#12160f; --card:#1a201a; --texto:#eef4ec; --texto-sec:#a9b8a6;
-      --borde:#2a352a; --verde-claro:#16281c; --sombra:0 2px 12px rgba(0,0,0,.4);
-    }
+    --texto:#1f2a24;
+    --texto-sec:#3d4a43;
+    --borde:#d8e0e8;
+    --sombra: 0 4px 18px rgba(0,42,92,.1);
   }
   *{box-sizing:border-box}
   body{
     margin:0; background:var(--bg); color:var(--texto);
-    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
-    line-height:1.5;
+    font-family: "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
+    line-height:1.55; -webkit-font-smoothing:antialiased;
   }
-  a{color:var(--azul)}
+  a{color:var(--azul-marino-claro)}
   header{
-    background:linear-gradient(135deg, var(--verde-oscuro), var(--verde));
-    color:#fff; padding:2rem 1.2rem 2.4rem; text-align:center;
+    background:linear-gradient(135deg, var(--azul-marino), var(--azul-marino-claro));
+    color:#fff; padding:2.2rem 1.2rem 2.6rem; text-align:center;
   }
+  header .logo-ayto{
+    height:64px; width:auto; margin:0 auto .9rem; display:block;
+    border-radius:8px; background:#fff; padding:5px 9px;
+  }
+  header .icono{font-size:2rem; margin-bottom:.35rem}
   .badge{
-    display:inline-block; background:rgba(255,255,255,.18); padding:.25rem .8rem;
+    display:inline-block; background:rgba(255,255,255,.16); padding:.25rem .8rem;
     border-radius:999px; font-size:.8rem; letter-spacing:.03em; margin-bottom:.7rem;
   }
-  header h1{margin:.2rem 0; font-size:1.7rem}
-  header p{max-width:640px; margin:.6rem auto 0; opacity:.95; font-size:1rem}
+  header h1{margin:.2rem 0; font-size:1.75rem; font-weight:800}
+  header .marca{margin:.35rem auto 0; max-width:640px; color:#dbe8f5; font-size:.95rem; font-weight:500}
+  header p{max-width:640px; margin:.7rem auto 0; color:#dbe8f5; font-size:1rem}
+  header .ayto{margin-top:.85rem; font-size:.88rem; color:#aecbe6}
   .kid-toggle{
-    margin-top:1rem; background:#fff; color:var(--verde-oscuro); border:none;
-    padding:.55rem 1.1rem; border-radius:999px; font-weight:600; cursor:pointer;
-    font-size:.95rem;
+    margin-top:1.1rem; background:#fff; color:var(--azul-marino); border:none;
+    padding:.55rem 1.1rem; border-radius:999px; font-weight:700; cursor:pointer;
+    font-size:.95rem; font-family:inherit;
   }
   main{max-width:920px; margin:0 auto; padding:1.4rem 1rem 3rem}
 
@@ -53,7 +60,7 @@
     background:var(--card); border:1px solid var(--borde); border-radius:16px;
     padding:1.3rem; box-shadow:var(--sombra); margin-bottom:1.6rem;
   }
-  .asistente h2{margin:0 0 .3rem; font-size:1.25rem; color:var(--verde-oscuro)}
+  .asistente h2{margin:0 0 .3rem; font-size:1.25rem; color:var(--azul-marino)}
   .asistente p.sub{margin:0 0 .9rem; color:var(--texto-sec); font-size:.92rem}
   .pregunta-row{display:flex; gap:.5rem; flex-wrap:wrap}
   #pregunta{
@@ -67,7 +74,7 @@
   #btnPreguntar:disabled{opacity:.6; cursor:default}
   .ejemplos{margin-top:.6rem; font-size:.85rem; color:var(--texto-sec)}
   .ejemplos button{
-    background:var(--verde-claro); border:1px solid var(--borde); color:var(--verde-oscuro);
+    background:var(--verde-claro); border:1px solid var(--borde); color:var(--azul-marino);
     border-radius:999px; padding:.3rem .7rem; margin:.25rem .3rem 0 0; font-size:.82rem; cursor:pointer;
   }
   #resultado{margin-top:1.1rem}
@@ -80,7 +87,7 @@
     border:1px solid var(--borde); border-left:4px solid var(--verde); border-radius:10px;
     padding:.9rem 1rem; margin-bottom:.75rem; background:var(--card);
   }
-  .articulo-hit .meta{font-size:.8rem; color:var(--verde-oscuro); font-weight:700; margin-bottom:.55rem; line-height:1.35}
+  .articulo-hit .meta{font-size:.8rem; color:var(--azul-marino); font-weight:700; margin-bottom:.55rem; line-height:1.35}
   .articulo-hit .texto{font-size:.95rem; color:var(--texto); line-height:1.55}
   .articulo-hit .texto-p{margin:0 0 .7rem}
   .articulo-hit .texto-p:last-child{margin-bottom:0}
@@ -91,11 +98,11 @@
   .articulo-hit .seccion-titulo:first-child{border-top:none; padding-top:0; margin-top:0}
   .articulo-hit .titulo-norma{
     margin:1.4rem 0 .55rem;font-weight:800;font-size:.92rem;letter-spacing:.03em;
-    text-transform:uppercase;color:var(--verde-oscuro);padding-top:.85rem;
-    border-top:2px solid var(--verde);line-height:1.35;
+    text-transform:uppercase;color:var(--azul-marino);padding-top:.85rem;
+    border-top:2px solid var(--azul-marino);line-height:1.35;
   }
   .articulo-hit .capitulo-norma{
-    margin:1rem 0 .5rem;font-weight:700;font-size:.95rem;color:var(--azul);line-height:1.4;
+    margin:1rem 0 .5rem;font-weight:700;font-size:.95rem;color:var(--azul-marino-claro);line-height:1.4;
   }
   .articulo-hit .nota-editorial,
   .articulo .nota-editorial{
@@ -113,7 +120,7 @@
   }
   .articulo-hit .fracciones .num,
   .articulo-hit .incisos .num{
-    font-weight:700; color:var(--verde-oscuro); margin-right:.3rem;
+    font-weight:700; color:var(--azul-marino); margin-right:.3rem;
   }
   .articulo-hit .incisos{
     margin:.45rem 0 .25rem; padding:0; list-style:none;
@@ -131,7 +138,7 @@
   .paso{background:var(--card); border:1px solid var(--borde); border-radius:12px; padding:.9rem; font-size:.88rem; color:var(--texto-sec)}
   .paso b{display:block; color:var(--texto); font-size:.95rem; margin-bottom:.2rem}
 
-  h2.sec{font-size:1.2rem; color:var(--verde-oscuro); margin:1.8rem 0 .6rem}
+  h2.sec{font-size:1.2rem; color:var(--azul-marino); margin:1.8rem 0 .6rem}
   .controles{display:flex; gap:.6rem; margin-bottom:.7rem; flex-wrap:wrap}
   #buscador{flex:1 1 220px; padding:.6rem .8rem; border-radius:10px; border:1px solid var(--borde); background:var(--card); color:var(--texto); font-size:.95rem}
   .chips{display:flex; flex-wrap:wrap; gap:.4rem; margin-bottom:.6rem}
@@ -139,7 +146,7 @@
     border:1px solid var(--borde); background:var(--card); color:var(--texto-sec);
     padding:.35rem .8rem; border-radius:999px; font-size:.82rem; cursor:pointer;
   }
-  .chip.activo{background:var(--verde); color:#fff; border-color:var(--verde)}
+  .chip.activo{background:var(--azul-marino); color:#fff; border-color:var(--azul-marino)}
   #contador{font-size:.82rem; color:var(--texto-sec); margin-bottom:.6rem}
   .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:.9rem}
   .tarjeta{
@@ -147,7 +154,7 @@
     box-shadow:var(--sombra); display:flex; flex-direction:column; gap:.4rem;
   }
   .tarjeta .icono{font-size:1.6rem}
-  .tarjeta h3{margin:0; font-size:1.02rem}
+  .tarjeta h3{margin:0; font-size:1.02rem; color:var(--azul-marino)}
   .tarjeta p{margin:0; font-size:.88rem; color:var(--texto-sec)}
   .tarjeta .kid{display:none; font-size:.88rem; color:var(--texto-sec); font-style:italic}
   body.modo-kid .tarjeta p.resumen{display:none}
@@ -155,7 +162,7 @@
   .tarjeta a.enlace{font-size:.85rem; margin-top:.3rem; font-weight:600}
   .tarjeta a.enlace-lectura{
     display:inline-block;margin-top:.5rem;font-size:.9rem;font-weight:700;
-    color:var(--verde-oscuro);text-decoration:none;
+    color:var(--azul-marino);text-decoration:none;
   }
   .tarjeta a.enlace-lectura:hover{text-decoration:underline}
   .tarjeta .acciones{margin-top:auto;padding-top:.35rem;display:flex;flex-direction:column;gap:.15rem}
@@ -165,18 +172,23 @@
     margin-top:2rem; background:var(--verde-claro); border-radius:16px; padding:1.4rem; text-align:center;
   }
   .cta a.boton{
-    display:inline-block; margin-top:.6rem; background:var(--amarillo); color:#3a2a00;
+    display:inline-block; margin-top:.6rem; background:var(--verde); color:#fff;
     padding:.7rem 1.4rem; border-radius:999px; font-weight:700; text-decoration:none;
   }
   footer{text-align:center; padding:1.6rem 1rem 2.4rem; color:var(--texto-sec); font-size:.85rem}
+  footer a{color:var(--azul-marino); font-weight:600}
 </style>
 </head>
 <body>
 
 <header>
+  <img class="logo-ayto" src="logo_ayuntamiento.jpg" alt="H. Ayuntamiento de Pabellón de Arteaga" width="180" height="64" />
+  <div class="icono">🌿</div>
   <span class="badge">Consulta pública · agosto 2026</span>
   <h1>Reglamentos nuevos de Pabellón de Arteaga</h1>
+  <p class="marca">IMBIO — Instituto Municipal de Biodiversidad y Protección Ambiental</p>
   <p>El municipio está actualizando el Bando de Policía y Buen Gobierno y sus 11 reglamentos. Aquí puedes leerlos en lenguaje sencillo, buscar artículos reales por tema, y mandarnos tus dudas u observaciones.</p>
+  <div class="ayto">H. Ayuntamiento de Pabellón de Arteaga</div>
   <button class="kid-toggle" onclick="toggleKid()" id="kidBtn">🧒 Modo fácil</button>
 </header>
 

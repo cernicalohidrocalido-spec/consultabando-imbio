@@ -4,33 +4,35 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Lectura — Consulta Pública IMBIO</title>
+<meta name="theme-color" content="#002A5C" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --verde:#2f8f5b; --verde-oscuro:#1f6b42; --verde-claro:#eaf7ef;
-    --azul:#2e6ea6; --bg:#fbfdfb; --card:#ffffff;
-    --texto:#22301f; --texto-sec:#5a6b57; --borde:#e1ece2;
-    --sombra:0 2px 10px rgba(31,107,66,.08);
+    --azul-marino:#002A5C; --azul-marino-claro:#0B3D75;
+    --verde:#2f8f5b; --verde-oscuro:#1f6b42; --verde-claro:#e6f4ec;
+    --azul:#0B3D75; --bg:#f4f6f8; --card:#ffffff;
+    --texto:#1f2a24; --texto-sec:#3d4a43; --borde:#d8e0e8;
+    --sombra:0 4px 18px rgba(0,42,92,.1);
     --toc-w:280px;
-  }
-  @media (prefers-color-scheme: dark){
-    :root{
-      --bg:#12160f; --card:#1a201a; --texto:#eef4ec; --texto-sec:#a9b8a6;
-      --borde:#2a352a; --verde-claro:#16281c;
-    }
   }
   *{box-sizing:border-box}
   [hidden]{display:none!important}
-  body{margin:0;background:var(--bg);color:var(--texto);font-family:"Segoe UI",system-ui,sans-serif;line-height:1.55}
-  a{color:var(--azul);text-decoration:none}
+  body{margin:0;background:var(--bg);color:var(--texto);font-family:"Plus Jakarta Sans","Segoe UI",system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:var(--azul-marino-claro);text-decoration:none}
   a:hover{text-decoration:underline}
 
   .topbar{
-    background:linear-gradient(135deg,var(--verde-oscuro),var(--verde));
-    color:#fff;padding:.85rem 1rem;display:flex;flex-wrap:wrap;align-items:center;gap:.6rem 1rem;
+    background:linear-gradient(135deg,var(--azul-marino),var(--azul-marino-claro));
+    color:#fff;padding:.7rem 1rem;display:flex;flex-wrap:wrap;align-items:center;gap:.55rem 1rem;
     position:sticky;top:0;z-index:20;
   }
+  .topbar .logo-ayto{
+    height:40px;width:auto;border-radius:6px;background:#fff;padding:3px 6px;
+  }
   .topbar a.volver{color:#fff;font-weight:600;font-size:.9rem}
-  .topbar h1{margin:0;font-size:1.05rem;flex:1 1 200px;line-height:1.3}
+  .topbar h1{margin:0;font-size:1.02rem;flex:1 1 180px;line-height:1.3;font-weight:700}
   .topbar .meta{font-size:.8rem;opacity:.9}
 
   .layout{display:flex;align-items:flex-start;max-width:1200px;margin:0 auto}
@@ -40,7 +42,7 @@
     padding:1rem .75rem 2rem 1rem;border-right:1px solid var(--borde);
     background:var(--card);
   }
-  .toc h2{margin:0 0 .6rem;font-size:.85rem;text-transform:uppercase;letter-spacing:.04em;color:var(--verde-oscuro)}
+  .toc h2{margin:0 0 .6rem;font-size:.85rem;text-transform:uppercase;letter-spacing:.04em;color:var(--azul-marino)}
   #buscaToc{
     width:100%;padding:.45rem .6rem;border:1px solid var(--borde);border-radius:8px;
     font-size:.85rem;background:var(--bg);color:var(--texto);margin-bottom:.6rem;
@@ -50,7 +52,7 @@
   .toc-list a{
     display:block;padding:.28rem .4rem;border-radius:6px;color:var(--texto-sec);
   }
-  .toc-list a:hover,.toc-list a.activo{background:var(--verde-claro);color:var(--verde-oscuro);text-decoration:none}
+  .toc-list a:hover,.toc-list a.activo{background:var(--verde-claro);color:var(--azul-marino);text-decoration:none}
   .toc-list a.oculto{display:none}
 
   .contenido{flex:1;min-width:0;padding:1.2rem 1.4rem 3rem;max-width:720px}
@@ -62,22 +64,22 @@
   }
   .articulo:last-child{border-bottom:none}
   .articulo h3{
-    margin:0 0 .65rem;font-size:1rem;color:var(--verde-oscuro);
+    margin:0 0 .65rem;font-size:1rem;color:var(--azul-marino);
     font-variant-numeric:tabular-nums;
   }
   .articulo .texto{font-size:.98rem;line-height:1.6}
   .articulo .texto-p{margin:0 0 .7rem}
   .articulo .seccion-titulo{
-    margin:1rem 0 .45rem;font-weight:700;color:var(--verde-oscuro);font-size:.92rem;
+    margin:1rem 0 .45rem;font-weight:700;color:var(--azul-marino);font-size:.92rem;
     padding-top:.55rem;border-top:1px solid var(--borde);
   }
   .articulo .titulo-norma{
     margin:1.6rem 0 .6rem;font-weight:800;font-size:.95rem;letter-spacing:.03em;
-    text-transform:uppercase;color:var(--verde-oscuro);padding-top:1rem;
-    border-top:2px solid var(--verde);line-height:1.35;
+    text-transform:uppercase;color:var(--azul-marino);padding-top:1rem;
+    border-top:2px solid var(--azul-marino);line-height:1.35;
   }
   .articulo .capitulo-norma{
-    margin:1.1rem 0 .55rem;font-weight:700;font-size:1rem;color:var(--azul);line-height:1.4;
+    margin:1.1rem 0 .55rem;font-weight:700;font-size:1rem;color:var(--azul-marino-claro);line-height:1.4;
   }
   .articulo .nota-editorial{
     margin:.85rem 0 .7rem;padding:.65rem .8rem;font-style:italic;font-size:.9rem;
@@ -86,12 +88,12 @@
   }
   .articulo .btn-duda{
     display:inline-block;margin-top:.75rem;padding:.45rem .85rem;font-size:.85rem;font-weight:600;
-    color:var(--verde-oscuro);background:var(--verde-claro);border:1px solid var(--borde);
+    color:var(--azul-marino);background:var(--verde-claro);border:1px solid var(--borde);
     border-radius:999px;text-decoration:none;cursor:pointer;font-family:inherit;
   }
-  .articulo .btn-duda:hover{background:var(--verde);color:#fff;border-color:var(--verde)}
+  .articulo .btn-duda:hover{background:var(--azul-marino);color:#fff;border-color:var(--azul-marino)}
   .articulo .btn-duda[aria-expanded="true"]{
-    background:var(--verde-oscuro);color:#fff;border-color:var(--verde-oscuro);
+    background:var(--azul-marino-claro);color:#fff;border-color:var(--azul-marino-claro);
   }
   .form-panel{
     margin-top:.75rem;padding:.85rem;border:1px solid var(--borde);border-radius:12px;
@@ -101,7 +103,7 @@
   .form-panel-hint{margin:0 0 .75rem;font-size:.82rem;color:var(--texto-sec)}
   .form-panel .ctx{
     margin:0 0 .85rem;padding:.55rem .7rem;font-size:.85rem;
-    background:var(--verde-claro);border-radius:8px;color:var(--verde-oscuro);
+    background:var(--verde-claro);border-radius:8px;color:var(--azul-marino);
   }
   .form-inline{display:grid;gap:.65rem}
   .form-inline label{font-size:.82rem;font-weight:600;color:var(--texto)}
@@ -119,7 +121,7 @@
   .form-inline button[type="submit"]:hover{background:var(--verde-oscuro)}
   .form-ok{
     padding:.85rem;background:var(--verde-claro);border-radius:10px;
-    color:var(--verde-oscuro);font-size:.92rem;
+    color:var(--azul-marino);font-size:.92rem;
   }
   .submit-frame{display:none;width:0;height:0;border:none}
   @media (max-width:520px){.form-row-2{grid-template-columns:1fr}}
@@ -132,7 +134,7 @@
     margin:.3rem 0;padding:.4rem .65rem;border:1px solid var(--borde);
     border-left:3px solid var(--azul);border-radius:0 8px 8px 0;
   }
-  .articulo .num{font-weight:700;color:var(--verde-oscuro);margin-right:.3rem}
+  .articulo .num{font-weight:700;color:var(--azul-marino);margin-right:.3rem}
 
   .articulo.resaltado{background:var(--verde-claro);margin-left:-.6rem;margin-right:-.6rem;padding:.6rem;border-radius:10px}
   .articulo.oculto{display:none}
@@ -161,6 +163,7 @@
 
 <header class="topbar">
   <a class="volver" href="index.html">← Volver</a>
+  <img class="logo-ayto" src="logo_ayuntamiento.jpg" alt="Ayuntamiento" width="120" height="40" />
   <h1 id="tituloDoc">Cargando…</h1>
   <span class="meta" id="metaDoc"></span>
   <button type="button" class="toc-toggle" id="btnToc" aria-expanded="false">Índice</button>
