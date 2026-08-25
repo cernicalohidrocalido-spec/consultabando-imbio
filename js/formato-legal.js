@@ -11,8 +11,9 @@ function formatTextoLegal(texto) {
   let s = escapeHtml(texto);
 
   // Notas editoriales (no son texto normativo; se muestran aparte en cursiva)
+  // Solo corta ante TÍTULO/CAPÍTULO estructurales (mayúsculas + número/romano), no ante "Capítulo" en prosa.
   s = s.replace(
-    /\s*(Nota editorial(?:\s*\([^)]*\))?:\s*.+?)(?=\s+(?:TÍTULO|TITULO|CAPÍTULO|CAPITULO|Secci[oó]n)\s|$)/gi,
+    /\s*(Nota editorial(?:\s*\([^)]*\))?:\s*.+?)(?=\s+(?:TÍTULO|TITULO)\s+(?:PRIMERO|SEGUNDO|TERCERO|CUARTO|QUINTO|SEXTO|[IVXLCDM]+)|\s+CAP[ÍI]TULO\s+(?:[IVXLCDM]+|\d+)\b|$)/g,
     '</p><p class="nota-editorial">$1</p><p class="texto-p">'
   );
 
