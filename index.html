@@ -66,6 +66,18 @@
   header .btn-exposicion:hover{background:rgba(255,255,255,.92); text-decoration:none}
   main{max-width:920px; margin:0 auto; padding:1.4rem 1rem 3rem}
 
+  .objeto-consulta{
+    background:var(--card); border:1px solid var(--borde); border-left:4px solid var(--azul-marino);
+    border-radius:12px; padding:1.1rem 1.25rem; margin-bottom:1.4rem;
+    box-shadow:var(--sombra);
+  }
+  .objeto-consulta h2{
+    margin:0 0 .55rem; font-size:1.05rem; color:var(--azul-marino); font-weight:800;
+  }
+  .objeto-consulta p{
+    margin:0; font-size:.92rem; color:var(--texto-sec); line-height:1.55;
+  }
+
   .asistente{
     background:var(--card); border:1px solid var(--borde); border-radius:16px;
     padding:1.3rem; box-shadow:var(--sombra); margin-bottom:1.6rem;
@@ -204,6 +216,8 @@
   .tarjeta a.enlace-pdf:hover{text-decoration:underline}
   .tarjeta .acciones{margin-top:auto;padding-top:.35rem;display:flex;flex-direction:column;gap:.15rem}
   .sin-resultados{display:none; text-align:center; color:var(--texto-sec); padding:1.5rem}
+  .sin-resultados[hidden]{display:none!important}
+  .cargando-regs{text-align:center; color:var(--texto-sec); padding:1.5rem; margin:0; grid-column:1/-1}
 
   .fuente-sec{
     margin:0 0 .75rem; font-size:1.05rem; color:var(--azul-marino);
@@ -305,6 +319,11 @@
 
 <main>
 
+  <section class="objeto-consulta" aria-labelledby="objetoConsultaTitulo">
+    <h2 id="objetoConsultaTitulo">Objeto de la consulta pública</h2>
+    <p>El H. Ayuntamiento de Pabellón de Arteaga pone a disposición de la ciudadanía el proyecto de actualización de su marco reglamentario municipal, con el propósito de recibir observaciones, propuestas y comentarios que permitan fortalecer su contenido jurídico, técnico y operativo antes de su presentación ante el H. Cabildo. Las observaciones recibidas a través de este sitio serán turnadas a la Dirección Jurídica municipal para su revisión y, en su caso, incorporación al proyecto final.</p>
+  </section>
+
   <div class="pasos">
     <div class="paso"><b>1. Explora</b>Abre el reglamento que te afecta (tarjetas abajo) y léelo artículo por artículo.</div>
     <div class="paso"><b>2. Pregunta</b>Si no sabes en cuál buscar, escribe un tema (por ejemplo "tianguis" o "ruido") y te mostramos los artículos reales.</div>
@@ -340,8 +359,8 @@
   </div>
   <div class="chips" id="chips"></div>
   <div id="contador"></div>
-  <div class="grid" id="grid"></div>
-  <div class="sin-resultados" id="sinResultados">No encontramos reglamentos con esa búsqueda. Intenta con otra palabra.</div>
+  <div class="grid" id="grid"><p class="cargando-regs" id="cargandoRegs">Cargando reglamentos…</p></div>
+  <div class="sin-resultados" id="sinResultados" hidden>No encontramos reglamentos con esa búsqueda. Intenta con otra palabra.</div>
 
   <section class="asistente">
     <h2>🔍 Pregúntale a los reglamentos</h2>
@@ -610,11 +629,16 @@ function tarjetaHTML(r){
     </div>
   </div>`;
 }
-function render(lista){
+function render(lista, busquedaActiva){
   const derivados = reglamentosDerivados();
   document.getElementById("grid").innerHTML = lista.map(tarjetaHTML).join("");
   document.getElementById("contador").textContent = `${lista.length} de ${derivados.length} reglamentos`;
-  document.getElementById("sinResultados").style.display = lista.length ? "none" : "block";
+  const sin = document.getElementById("sinResultados");
+  // Solo mostrar "sin resultados" cuando el usuario filtró de verdad y no hay coincidencias.
+  // Nunca al cargar la página con búsqueda/categoría vacías.
+  const mostrarVacio = busquedaActiva && lista.length === 0;
+  sin.hidden = !mostrarVacio;
+  sin.style.display = mostrarVacio ? "block" : "none";
 }
 function filtrar(){
   const q = document.getElementById("buscador").value.trim().toLowerCase();
@@ -627,7 +651,8 @@ function filtrar(){
       r.categoria.toLowerCase().includes(q)
     );
   }
-  render(lista);
+  const busquedaActiva = q.length > 0 || categoriaActual !== "Todos";
+  render(lista, busquedaActiva);
 }
 
 /* ---------- Buscador de artículos reales ---------- */
