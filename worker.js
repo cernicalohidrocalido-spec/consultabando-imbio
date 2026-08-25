@@ -5,12 +5,12 @@
  *
  * Secrets / vars (wrangler):
  *   ANTHROPIC_API_KEY  — secret
- *   ALLOWED_ORIGIN     — ej. https://imbio.info
+ *   ALLOWED_ORIGIN     — ej. https://consultabando.imbio.info
  */
 export default {
   async fetch(request, env) {
     const origin = request.headers.get("Origin") || "";
-    const allowed = env.ALLOWED_ORIGIN || "https://imbio.info";
+    const allowed = env.ALLOWED_ORIGIN || "https://consultabando.imbio.info";
     const cors = {
       "Access-Control-Allow-Origin": allowed,
       "Access-Control-Allow-Methods": "POST, OPTIONS",
