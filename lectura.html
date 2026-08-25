@@ -183,16 +183,6 @@ const FORM_URL = "https://form.jotform.com/262358713140049";
 const FORM_SUBMIT = "https://submit.jotform.com/submit/262358713140049";
 const FORM_ID = "262358713140049";
 
-// Jotform aún tiene la etiqueta antigua de CAPAPA en el dropdown hasta que la actualices allí.
-const JOTFORM_REGLAMENTO = {
-  "Reglamento de la Comisión de Agua Potable y Alcantarillado de Pabellón de Arteaga (CAPAPA)":
-    "Reglamento de Construcción, Alineamiento, Predios y Anuncios (CAPAPA)",
-};
-
-function jotformReglamentoValue(reglamento) {
-  return JOTFORM_REGLAMENTO[reglamento] || reglamento;
-}
-
 const CATALOGO = {
   bando: { titulo: "Bando de Policía y Buen Gobierno", color: "#2f8f5b" },
   actos: { titulo: "Actos y Procedimientos Administrativos", color: "#2f8f5b" },
@@ -238,7 +228,7 @@ function formEmbedUrl(reglamento, articulo) {
 
 function formPanelHtml(a) {
   const id = slugArt(a.articulo);
-  const regVal = escapeHtml(jotformReglamentoValue(a.reglamento));
+  const regVal = escapeHtml(a.reglamento);
   const artVal = escapeHtml(String(a.articulo));
   const frameName = `jf_${id}`;
   return `<div class="form-panel" hidden>
