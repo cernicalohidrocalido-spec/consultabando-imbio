@@ -34,7 +34,7 @@ Al inicio del bloque `<script>`:
 
 | Constante | Uso |
 |-----------|-----|
-| `FORM_URL` | Enlace del formulario (Jotform / Google Forms) del botón «Enviar mi duda u observación» |
+| `FORM_URL` | Enlace del formulario Jotform: `https://form.jotform.com/262358713140049` |
 | `ASISTENTE_URL` | URL pública del Worker (ej. `https://asistente.imbio.info`). Si queda `""`, la búsqueda sigue funcionando solo con artículos reales |
 
 ## Desplegar el Worker (`worker.js`)

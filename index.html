@@ -233,7 +233,7 @@
    CONFIGURACIÓN — edita estas dos líneas cuando tengas listos
    el formulario y el Worker de Cloudflare.
    ============================================================ */
-const FORM_URL = "PON_AQUI_TU_ENLACE_DE_JOTFORM_O_GOOGLE_FORMS";
+const FORM_URL = "https://form.jotform.com/262358713140049";
 // URL del Worker de Cloudflare (ver worker.js). Déjalo vacío ("")
 // para que la búsqueda funcione SOLO con el texto real (sin IA)
 // mientras despliegas el Worker.
@@ -270,12 +270,12 @@ const REGLAMENTOS = [
   {id:"espectaculos", categoria:"Economía", color:"#f4b400", icono:"🎉", titulo:"Espectáculos y Diversiones Públicas",
    resumen:"Los permisos para eventos, ferias, bailes y diversiones públicas.",
    kid:"Son las reglas para las fiestas, ferias y eventos que se hacen en el pueblo."},
-  {id:"capapa", categoria:"Territorio", color:"#c1622a", icono:"🧱", titulo:"Construcción, Alineamiento, Predios y Anuncios (CAPAPA)",
-   resumen:"Los permisos de construcción, alineación de predios y anuncios.",
-   kid:"Dice qué permisos se necesitan para construir una casa o poner un anuncio grande."},
-  {id:"servicios", categoria:"General", color:"#2f8f5b", icono:"🚰", titulo:"Servicios Públicos Municipales",
-   resumen:"El agua, la basura, el alumbrado y otros servicios que da el municipio.",
-   kid:"Habla de servicios como el agua, la luz de las calles y la recolección de basura."},
+  {id:"capapa", categoria:"General", color:"#2e6ea6", icono:"🚰", titulo:"Comisión de Agua Potable y Alcantarillado (CAPAPA)",
+   resumen:"El organismo que da el servicio de agua potable, alcantarillado y saneamiento, y cómo funciona.",
+   kid:"Habla del agua: quién la reparte, cómo se cuida el drenaje y cómo funciona el organismo que se encarga de eso."},
+  {id:"servicios", categoria:"General", color:"#2f8f5b", icono:"🧹", titulo:"Servicios Públicos Municipales",
+   resumen:"El alumbrado, la basura, los mercados, el tianguis y los panteones del municipio.",
+   kid:"Habla de servicios como la luz de las calles, la recolección de basura, los mercados y los panteones (el agua ya no va aquí, va en el reglamento de CAPAPA)."},
   {id:"trabajo", categoria:"General", color:"#2f8f5b", icono:"👷", titulo:"Condiciones de Trabajo",
    resumen:"Las reglas laborales para quienes trabajan en el Ayuntamiento.",
    kid:"Son las reglas para las personas que trabajan en el gobierno del municipio."},

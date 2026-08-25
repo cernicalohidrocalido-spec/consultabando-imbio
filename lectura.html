@@ -83,6 +83,12 @@
     color:var(--texto-sec);background:var(--bg);border-left:3px solid var(--texto-sec);
     border-radius:0 8px 8px 0;line-height:1.5;
   }
+  .articulo .btn-duda{
+    display:inline-block;margin-top:.75rem;padding:.45rem .85rem;font-size:.85rem;font-weight:600;
+    color:var(--verde-oscuro);background:var(--verde-claro);border:1px solid var(--borde);
+    border-radius:999px;text-decoration:none;
+  }
+  .articulo .btn-duda:hover{text-decoration:underline}
   .articulo .fracciones,.articulo .incisos{margin:.35rem 0 .8rem;padding:0;list-style:none}
   .articulo .fracciones li{
     margin:.4rem 0;padding:.5rem .7rem;border-left:3px solid var(--verde);
@@ -139,6 +145,8 @@
 
 <script src="js/formato-legal.js"></script>
 <script>
+const FORM_URL = "https://form.jotform.com/262358713140049";
+
 const CATALOGO = {
   bando: { titulo: "Bando de Policía y Buen Gobierno", color: "#2f8f5b" },
   actos: { titulo: "Actos y Procedimientos Administrativos", color: "#2f8f5b" },
@@ -149,7 +157,7 @@ const CATALOGO = {
   biodiversidad: { titulo: "Biodiversidad y Protección Ambiental", color: "#1f6b42" },
   comercio: { titulo: "Comercio", color: "#f4b400" },
   espectaculos: { titulo: "Espectáculos y Diversiones Públicas", color: "#f4b400" },
-  capapa: { titulo: "Construcción, Alineamiento, Predios y Anuncios (CAPAPA)", color: "#c1622a" },
+  capapa: { titulo: "Comisión de Agua Potable y Alcantarillado (CAPAPA)", color: "#2e6ea6" },
   servicios: { titulo: "Servicios Públicos Municipales", color: "#2f8f5b" },
   trabajo: { titulo: "Condiciones de Trabajo", color: "#2f8f5b" },
 };
@@ -218,9 +226,11 @@ async function init() {
     <p class="intro"><strong>${escapeHtml(nombreLegal)}</strong> — lectura continua con índice. El texto proviene del paquete normativo en consulta pública; no se ha alterado.</p>
     ${arts.map((a) => {
       const id = slugArt(a.articulo);
+      const formHref = `${FORM_URL}?reglamento=${encodeURIComponent(a.reglamento)}&articulo=${encodeURIComponent(String(a.articulo))}`;
       return `<article class="articulo" id="art-${id}" data-art="${id}">
         <h3>Artículo ${escapeHtml(String(a.articulo))}</h3>
         <div class="texto">${formatTextoLegal(a.texto)}</div>
+        <a class="btn-duda" href="${formHref}" target="_blank" rel="noopener">Enviar duda, comentario o mejora sobre este artículo →</a>
       </article>`;
     }).join("")}
   `;
