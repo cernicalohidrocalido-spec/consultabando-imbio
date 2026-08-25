@@ -32,6 +32,26 @@ function formatTextoLegal(texto) {
     '</p><p class="seccion-titulo">$1</p><p class="texto-p">'
   );
 
+  // TRANSITORIOS: encabezado + PRIMERO.-, SEGUNDO.-, …
+  const ORD =
+    "PRIMERO|SEGUNDO|TERCERO|CUARTO|QUINTO|SEXTO|SÉPTIMO|SEPTIMO|OCTAVO|NOVENO|DÉCIMO|DECIMO|UNDÉCIMO|UNDECIMO|DUODÉCIMO|DUODECIMO";
+  s = s.replace(/\s*(TRANSITORIOS)\s+/g, '</p><p class="titulo-norma">$1</p><p class="texto-p">');
+  if (new RegExp("(?:" + ORD + ")\\.-").test(s)) {
+    s = s.replace(
+      new RegExp("(" + ORD + ")\\.-\\s+"),
+      '</p><ol class="fracciones transitorios"><li><span class="num">$1.-</span> '
+    );
+    s = s.replace(
+      new RegExp("\\s+(" + ORD + ")\\.-\\s+", "g"),
+      '</li><li><span class="num">$1.-</span> '
+    );
+    if (s.includes('class="fracciones transitorios"')) {
+      s = s.replace(/(<\/p><p class="(?:titulo-norma|capitulo-norma|seccion-titulo|nota-editorial)">)/, '</li></ol>$1');
+      if (!/fracciones transitorios[\s\S]*?<\/ol>/.test(s)) s += '</li></ol>';
+      s = s.replace(/<\/ol><\/p>/g, '</ol>');
+    }
+  }
+
   if (/[a-z]\)\s/.test(s)) {
     s = s.replace(/(:\s*)([a-z]\))\s+/gi, '$1<ul class="incisos"><li><span class="num">$2</span> ');
     s = s.replace(/;\s*([a-z]\))\s+/gi, '</li><li><span class="num">$1</span> ');
