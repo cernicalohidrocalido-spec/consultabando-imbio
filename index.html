@@ -91,7 +91,7 @@
   .codigo-busca p.hint-codigo{margin:0 0 .9rem; color:var(--texto-sec); font-size:.9rem}
   .codigo-busca .pregunta-row{display:flex; gap:.5rem; flex-wrap:wrap}
   #codigoArt{
-    flex:1 1 160px; max-width:220px; padding:.75rem .9rem; border-radius:10px; border:1px solid var(--borde);
+    flex:1 1 200px; max-width:280px; padding:.75rem .9rem; border-radius:10px; border:1px solid var(--borde);
     font-size:1rem; background:var(--bg); color:var(--texto);
   }
   #btnCodigo{
@@ -332,9 +332,9 @@
 
   <section class="codigo-busca" id="codigoMunicipal">
     <h2>📜 Artículo del Código Municipal 2024</h2>
-    <p class="hint-codigo">Escribe un número de artículo del Código vigente y te decimos en qué reglamento nuevo quedó.</p>
+    <p class="hint-codigo">Escribe un número de artículo del Código vigente (también BIS, TER, QUATER, etc.) y te decimos en qué reglamento nuevo quedó.</p>
     <div class="pregunta-row">
-      <input id="codigoArt" type="text" inputmode="numeric" placeholder="Ej. 1795" autocomplete="off" />
+      <input id="codigoArt" type="text" inputmode="text" placeholder="Ej. 17 BIS" autocomplete="off" />
       <button type="button" id="btnCodigo" onclick="buscarCodigoMunicipal()">Buscar</button>
     </div>
     <div id="codigoResultado"></div>
@@ -497,20 +497,52 @@ let ARTICULOS = [];
 let INDEX_ORIGEN_CODIGO = Object.create(null);
 let cargaError = false;
 
+const SUFIJOS_ART =
+  "BIS|TER|QUATER|QUINQUIES|SEXIES|SEPTIES|OCTIES|NOVIES|DECIES|UNDECIES|DUODECIES";
+
+/** Normaliza claves tipo "17 BIS", "Art. 17-bis", "17bis", "349 QUÁTER". */
+function normalizaClaveArticuloCodigo(s) {
+  let k = String(s || "")
+    .toUpperCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/ARTICULO\.?\s*/g, "")
+    .replace(/ART\.?\s*/g, "")
+    .replace(/[^A-Z0-9]+/g, " ")
+    .trim()
+    .replace(/\s+/g, " ");
+  k = k.replace(new RegExp("^(\\d+)\\s*(" + SUFIJOS_ART + ")$"), "$1 $2");
+  return k;
+}
+
+function clavesArticuloCodigo(s) {
+  const k = normalizaClaveArticuloCodigo(s);
+  if (!k) return [];
+  const keys = [k];
+  const compact = k.replace(/\s+/g, "");
+  if (compact !== k) keys.push(compact);
+  return keys;
+}
+
 function construirIndiceOrigenCodigo() {
   const idx = Object.create(null);
   function agregar(a, o, tipo) {
-    const k = String(o.articulo_codigo).trim();
-    if (!k) return;
-    const lista = idx[k] || (idx[k] = []);
-    // Evitar duplicar el mismo reglamento+artículo+tipo
-    if (lista.some((h) => h.doc === a.doc && String(h.articulo) === String(a.articulo) && h.tipo === tipo)) return;
-    lista.push({
+    const bruto = String(o.articulo_codigo || "").trim();
+    if (!bruto) return;
+    const claves = clavesArticuloCodigo(bruto);
+    if (claves.length === 0) return;
+    const hit = {
       doc: a.doc,
       reglamento: a.reglamento,
       articulo: a.articulo,
       tipo, // "origen" = equivalencia textual; "tematico" = origen_tematico del Bando
-    });
+      articulo_codigo: bruto,
+    };
+    for (const k of claves) {
+      const lista = idx[k] || (idx[k] = []);
+      if (lista.some((h) => h.doc === a.doc && String(h.articulo) === String(a.articulo) && h.tipo === tipo)) continue;
+      lista.push(hit);
+    }
   }
   for (const a of ARTICULOS) {
     for (const o of (a.origen || [])) agregar(a, o, "origen");
@@ -714,31 +746,37 @@ document.getElementById("pregunta").addEventListener("keydown", e=>{
 function buscarCodigoMunicipal() {
   const cont = document.getElementById("codigoResultado");
   const raw = document.getElementById("codigoArt").value.trim();
-  // Acepta "1", "artículo 1", "Art. 1", etc.
-  const num = raw.replace(/[^\d.]/g, "");
-  if (!num) {
-    cont.innerHTML = `<div class="sin-hits">Escribe el número de artículo del Código Municipal 2024 (por ejemplo 1 o 1795).</div>`;
+  // Acepta "1", "artículo 1", "17 BIS", "Art. 17-bis", "17quater", etc.
+  const clave = normalizaClaveArticuloCodigo(raw);
+  if (!clave || !/^\d/.test(clave)) {
+    cont.innerHTML = `<div class="sin-hits">Escribe el artículo del Código Municipal 2024 (por ejemplo <b>1795</b> o <b>17 BIS</b>).</div>`;
     return;
   }
   if (cargaError || ARTICULOS.length === 0) {
     cont.innerHTML = `<div class="sin-hits">Aún se está cargando el índice de artículos. Intenta de nuevo en un momento.</div>`;
     return;
   }
-  const hits = INDEX_ORIGEN_CODIGO[num] || [];
+  let hits = [];
+  for (const k of clavesArticuloCodigo(clave)) {
+    const lista = INDEX_ORIGEN_CODIGO[k];
+    if (lista && lista.length) { hits = lista; break; }
+  }
+  const etiqueta = clave;
   if (hits.length === 0) {
-    cont.innerHTML = `<div class="sin-hits">No encontramos equivalencia para el Artículo <b>${escapeHtml(num)}</b> del Código Municipal 2024 en los reglamentos de esta consulta (puede ser que no se haya trasladado o que el número no exista).</div>`;
+    cont.innerHTML = `<div class="sin-hits">No encontramos equivalencia para el Artículo <b>${escapeHtml(etiqueta)}</b> del Código Municipal 2024 en los reglamentos de esta consulta (puede ser que no se haya trasladado o que el número no exista).</div>`;
     return;
   }
+  const numCodigo = hits[0].articulo_codigo || etiqueta;
   cont.innerHTML =
-    `<div class="sin-hits" style="margin-bottom:.5rem">Artículo <b>${escapeHtml(num)}</b> del Código Municipal 2024 quedó en:</div>` +
+    `<div class="sin-hits" style="margin-bottom:.5rem">Artículo <b>${escapeHtml(etiqueta)}</b> del Código Municipal 2024 quedó en:</div>` +
     hits.map((h) => {
       const href = `lectura.html?doc=${encodeURIComponent(h.doc)}#art-${encodeURIComponent(String(h.articulo).replace(/[^\w.-]+/g, "-"))}`;
-      const hrefCodigo = `lectura.html?doc=codigo#art-${encodeURIComponent(String(num).replace(/[^\w.-]+/g, "-"))}`;
+      const hrefCodigo = `lectura.html?doc=codigo#art-${encodeURIComponent(String(numCodigo).replace(/[^\w.-]+/g, "-"))}`;
       const nota = h.tipo === "tematico"
         ? ` <span style="color:var(--texto-sec);font-size:.85rem">(origen temático en el Bando)</span>`
         : "";
       return `<div class="codigo-hit">
-        <a href="${hrefCodigo}" target="_blank" rel="noopener">Artículo ${escapeHtml(num)}</a> del Código Municipal 2024 → ahora es el
+        <a href="${hrefCodigo}" target="_blank" rel="noopener">Artículo ${escapeHtml(String(numCodigo))}</a> del Código Municipal 2024 → ahora es el
         <a href="${href}">Artículo ${escapeHtml(String(h.articulo))}</a>
         del <strong>${escapeHtml(h.reglamento)}</strong>${nota}
       </div>`;
