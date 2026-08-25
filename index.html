@@ -506,7 +506,7 @@ function construirIndiceOrigenCodigo() {
   INDEX_ORIGEN_CODIGO = idx;
 }
 
-fetch("data/articulos.json?v=pdfOrigen1")
+fetch("data/articulos.json?v=notasEd1")
   .then(r => r.json())
   .then(d => { ARTICULOS = d; construirIndiceOrigenCodigo(); llenarSelectReglamentos(); })
   .catch(() => { cargaError = true; });
@@ -573,8 +573,11 @@ function formatRespuestaIA(texto) {
 }
 
 function hitHTML(h) {
+  const nota = String(h.nota_editorial || "").trim();
+  const notaHtml = nota ? `<p class="nota-editorial">${escapeHtml(nota)}</p>` : "";
   return `<div class="articulo-hit">
       <div class="meta">${escapeHtml(h.reglamento)} — Artículo ${escapeHtml(String(h.articulo))}</div>
+      ${notaHtml}
       <div class="texto">${formatTextoLegal(h.texto)}</div>
       <button type="button" class="btn-opinar"
         data-reglamento="${escapeHtml(h.reglamento)}"

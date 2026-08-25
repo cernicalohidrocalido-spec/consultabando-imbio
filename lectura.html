@@ -257,6 +257,12 @@ function renderError(msg) {
   document.getElementById("panelToc").style.display = "none";
 }
 
+function notaEditorialHtml(a) {
+  const nota = String(a.nota_editorial || "").trim();
+  if (!nota) return "";
+  return `<p class="nota-editorial">${escapeHtml(nota)}</p>`;
+}
+
 function origenHtml(a) {
   const origenDirecto = Array.isArray(a.origen) ? a.origen : [];
   const origenTematico = Array.isArray(a.origen_tematico) ? a.origen_tematico : [];
@@ -415,7 +421,7 @@ async function init() {
 
   let todos;
   try {
-    const r = await fetch("data/articulos.json?v=pdfOrigen1");
+    const r = await fetch("data/articulos.json?v=notasEd1");
     todos = await r.json();
   } catch {
     renderError("No pude cargar el índice de artículos (data/articulos.json).");
@@ -445,6 +451,7 @@ async function init() {
       const id = slugArt(a.articulo);
       return `<article class="articulo" id="art-${id}" data-art="${id}">
         <h3>Artículo ${escapeHtml(String(a.articulo))}</h3>
+        ${notaEditorialHtml(a)}
         <div class="texto">${formatTextoLegal(a.texto)}</div>
         ${origenHtml(a)}
         <button type="button" class="btn-opinar" aria-expanded="false">${BTN_OPINAR}</button>
