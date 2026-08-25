@@ -1,5 +1,7 @@
-# Fuentes oficiales (no publicadas en GitHub Pages)
+# Fuentes oficiales fuera de la carpeta pública
 *.docx
+!docx/
+!docx/*.docx
 
 # Duplicados de trabajo local
 index_1.html

@@ -205,6 +205,11 @@
     color:var(--azul-marino-claro);text-decoration:none;
   }
   .tarjeta a.enlace-pdf:hover{text-decoration:underline}
+  .tarjeta a.enlace-docx{
+    display:inline-block;margin-top:.25rem;font-size:.85rem;font-weight:600;
+    color:#1b5e9a;text-decoration:none;
+  }
+  .tarjeta a.enlace-docx:hover{text-decoration:underline}
   .tarjeta .acciones{margin-top:auto;padding-top:.35rem;display:flex;flex-direction:column;gap:.15rem}
   .cargando-regs{text-align:center; color:var(--texto-sec); padding:1.5rem; margin:0; grid-column:1/-1}
 
@@ -229,6 +234,12 @@
     text-decoration:none;
   }
   .fuente-card a.btn-pdf:hover{background:var(--azul-marino-claro); text-decoration:none}
+  .fuente-card a.btn-word{
+    display:inline-block; background:#fff; color:#1b5e9a;
+    padding:.65rem 1.2rem; border-radius:999px; font-weight:700; font-size:.92rem;
+    text-decoration:none; border:1px solid #2b7bb9;
+  }
+  .fuente-card a.btn-word:hover{background:#e8f2fa; text-decoration:none}
   .fuente-card a.btn-lectura{
     display:inline-block; background:#fff; color:var(--azul-marino);
     padding:.65rem 1.2rem; border-radius:999px; font-weight:700; font-size:.92rem;
@@ -327,6 +338,7 @@
     <div class="acciones">
       <a class="btn-lectura" href="lectura.html?doc=codigo" target="_blank" rel="noopener">Leer el Código →</a>
       <a class="btn-pdf" href="pdfs/Codigo_Municipal_v2024.pdf" target="_blank" rel="noopener">📄 Descargar PDF completo</a>
+      <a class="btn-word" href="docx/Codigo_Municipal_v2024.docx" download>📝 Descargar Word</a>
     </div>
   </div>
 
@@ -347,6 +359,7 @@
     <div class="acciones">
       <a href="lectura.html?doc=bando">Leer el Bando →</a>
       <a href="pdfs/Bando_Policia_Buen_Gobierno_Pabellon.pdf" target="_blank" rel="noopener">📄 Descargar PDF</a>
+      <a href="docx/Bando_Policia_Buen_Gobierno_Pabellon.docx" download>📝 Descargar Word</a>
       <button type="button" class="enlace" onclick="abrirFormularioReglamento('bando')">Enviar duda sobre el Bando →</button>
     </div>
   </div>
@@ -430,6 +443,20 @@ const PDF_POR_DOC = {
   capapa: "pdfs/Reglamento_CAPAPA_Pabellon.pdf",
   servicios: "pdfs/Reglamento_Servicios_Publicos_Pabellon.pdf",
   trabajo: "pdfs/Reglamento_Condiciones_Trabajo_Pabellon.pdf",
+};
+const DOCX_POR_DOC = {
+  bando: "docx/Bando_Policia_Buen_Gobierno_Pabellon.docx",
+  actos: "docx/Reglamento_Actos_Procedimientos_Administrativos_Pabellon.docx",
+  seguridad: "docx/Reglamento_Seguridad_Publica_Movilidad_Pabellon.docx",
+  urbano: "docx/Reglamento_Desarrollo_Urbano_Pabellon.docx",
+  gobierno: "docx/Reglamento_Gobierno_Interior_Pabellon.docx",
+  patrimonio: "docx/Reglamento_Patrimonio_Municipal_Pabellon.docx",
+  biodiversidad: "docx/Reglamento_Biodiversidad_Ambiental_Animal_Pabellon.docx",
+  comercio: "docx/Reglamento_Comercio_Via_Publica_Pabellon.docx",
+  espectaculos: "docx/Reglamento_Espectaculos_Festejos_Pabellon.docx",
+  capapa: "docx/Reglamento_CAPAPA_Pabellon.docx",
+  servicios: "docx/Reglamento_Servicios_Publicos_Pabellon.docx",
+  trabajo: "docx/Reglamento_Condiciones_Trabajo_Pabellon.docx",
 };
 
 const REGLAMENTOS = [
@@ -618,6 +645,7 @@ function hitHTML(h) {
 }
 function tarjetaHTML(r){
   const pdf = PDF_POR_DOC[r.id] || "";
+  const docx = DOCX_POR_DOC[r.id] || "";
   return `<div class="tarjeta" style="border-top:4px solid ${r.color}">
     <div class="icono">${r.icono}</div>
     <h3>${r.titulo}</h3>
@@ -626,6 +654,7 @@ function tarjetaHTML(r){
     <div class="acciones">
       <a class="enlace-lectura" href="lectura.html?doc=${r.id}">Leer el reglamento →</a>
       ${pdf ? `<a class="enlace-pdf" href="${pdf}" target="_blank" rel="noopener">📄 Descargar PDF</a>` : ""}
+      ${docx ? `<a class="enlace-docx" href="${docx}" download>📝 Descargar Word</a>` : ""}
       <button type="button" class="enlace" style="background:none;border:none;padding:0;cursor:pointer;font:inherit;text-align:left;color:var(--azul-marino-claro)" onclick="abrirFormularioReglamento('${r.id}')">Enviar duda sobre este reglamento →</button>
     </div>
   </div>`;

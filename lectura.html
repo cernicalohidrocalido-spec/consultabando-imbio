@@ -34,12 +34,14 @@
   .topbar a.volver{color:#fff;font-weight:600;font-size:.9rem}
   .topbar h1{margin:0;font-size:1.02rem;flex:1 1 180px;line-height:1.3;font-weight:700}
   .topbar .meta{font-size:.8rem;opacity:.9}
-  .topbar a.pdf-doc{
+  .topbar a.pdf-doc,
+  .topbar a.docx-doc{
     color:#fff;font-weight:600;font-size:.82rem;white-space:nowrap;
     background:rgba(255,255,255,.18);padding:.35rem .7rem;border-radius:999px;
     text-decoration:none;border:1px solid rgba(255,255,255,.28);
   }
-  .topbar a.pdf-doc:hover{background:rgba(255,255,255,.28);text-decoration:none}
+  .topbar a.pdf-doc:hover,
+  .topbar a.docx-doc:hover{background:rgba(255,255,255,.28);text-decoration:none}
 
   .layout{display:flex;align-items:flex-start;max-width:1200px;margin:0 auto}
   .toc{
@@ -211,6 +213,7 @@
   <h1 id="tituloDoc">Cargando…</h1>
   <span class="meta" id="metaDoc"></span>
   <a class="pdf-doc" id="linkPdf" href="#" target="_blank" rel="noopener" hidden>📄 Descargar PDF</a>
+  <a class="docx-doc" id="linkDocx" href="#" download hidden>📝 Descargar Word</a>
   <button type="button" class="toc-toggle" id="btnToc" aria-expanded="false">Índice</button>
 </header>
 
@@ -235,22 +238,23 @@ const CATALOGO = {
     titulo: "Código Municipal 2024",
     color: "#5a6b7a",
     pdf: "pdfs/Codigo_Municipal_v2024.pdf",
+    docx: "docx/Codigo_Municipal_v2024.docx",
     fuente: "data/codigo_municipal.json?v=lecturaCodigo1",
     soloConsulta: true,
     nombreLegal: "Código Municipal de Pabellón de Arteaga (versión 2024)",
   },
-  bando: { titulo: "Bando de Policía y Buen Gobierno", color: "#2f8f5b", pdf: "pdfs/Bando_Policia_Buen_Gobierno_Pabellon.pdf" },
-  actos: { titulo: "Actos y Procedimientos Administrativos", color: "#2f8f5b", pdf: "pdfs/Reglamento_Actos_Procedimientos_Administrativos_Pabellon.pdf" },
-  seguridad: { titulo: "Seguridad Pública y Movilidad", color: "#2e6ea6", pdf: "pdfs/Reglamento_Seguridad_Publica_Movilidad_Pabellon.pdf" },
-  urbano: { titulo: "Desarrollo Urbano", color: "#c1622a", pdf: "pdfs/Reglamento_Desarrollo_Urbano_Pabellon.pdf" },
-  gobierno: { titulo: "Gobierno Interior", color: "#2f8f5b", pdf: "pdfs/Reglamento_Gobierno_Interior_Pabellon.pdf" },
-  patrimonio: { titulo: "Patrimonio Municipal", color: "#c1622a", pdf: "pdfs/Reglamento_Patrimonio_Municipal_Pabellon.pdf" },
-  biodiversidad: { titulo: "Biodiversidad y Protección Ambiental", color: "#1f6b42", pdf: "pdfs/Reglamento_Biodiversidad_Ambiental_Animal_Pabellon.pdf" },
-  comercio: { titulo: "Comercio", color: "#f4b400", pdf: "pdfs/Reglamento_Comercio_Via_Publica_Pabellon.pdf" },
-  espectaculos: { titulo: "Espectáculos y Diversiones Públicas", color: "#f4b400", pdf: "pdfs/Reglamento_Espectaculos_Festejos_Pabellon.pdf" },
-  capapa: { titulo: "Comisión de Agua Potable y Alcantarillado (CAPAPA)", color: "#2e6ea6", pdf: "pdfs/Reglamento_CAPAPA_Pabellon.pdf" },
-  servicios: { titulo: "Servicios Públicos Municipales", color: "#2f8f5b", pdf: "pdfs/Reglamento_Servicios_Publicos_Pabellon.pdf" },
-  trabajo: { titulo: "Condiciones de Trabajo", color: "#2f8f5b", pdf: "pdfs/Reglamento_Condiciones_Trabajo_Pabellon.pdf" },
+  bando: { titulo: "Bando de Policía y Buen Gobierno", color: "#2f8f5b", pdf: "pdfs/Bando_Policia_Buen_Gobierno_Pabellon.pdf", docx: "docx/Bando_Policia_Buen_Gobierno_Pabellon.docx" },
+  actos: { titulo: "Actos y Procedimientos Administrativos", color: "#2f8f5b", pdf: "pdfs/Reglamento_Actos_Procedimientos_Administrativos_Pabellon.pdf", docx: "docx/Reglamento_Actos_Procedimientos_Administrativos_Pabellon.docx" },
+  seguridad: { titulo: "Seguridad Pública y Movilidad", color: "#2e6ea6", pdf: "pdfs/Reglamento_Seguridad_Publica_Movilidad_Pabellon.pdf", docx: "docx/Reglamento_Seguridad_Publica_Movilidad_Pabellon.docx" },
+  urbano: { titulo: "Desarrollo Urbano", color: "#c1622a", pdf: "pdfs/Reglamento_Desarrollo_Urbano_Pabellon.pdf", docx: "docx/Reglamento_Desarrollo_Urbano_Pabellon.docx" },
+  gobierno: { titulo: "Gobierno Interior", color: "#2f8f5b", pdf: "pdfs/Reglamento_Gobierno_Interior_Pabellon.pdf", docx: "docx/Reglamento_Gobierno_Interior_Pabellon.docx" },
+  patrimonio: { titulo: "Patrimonio Municipal", color: "#c1622a", pdf: "pdfs/Reglamento_Patrimonio_Municipal_Pabellon.pdf", docx: "docx/Reglamento_Patrimonio_Municipal_Pabellon.docx" },
+  biodiversidad: { titulo: "Biodiversidad y Protección Ambiental", color: "#1f6b42", pdf: "pdfs/Reglamento_Biodiversidad_Ambiental_Animal_Pabellon.pdf", docx: "docx/Reglamento_Biodiversidad_Ambiental_Animal_Pabellon.docx" },
+  comercio: { titulo: "Comercio", color: "#f4b400", pdf: "pdfs/Reglamento_Comercio_Via_Publica_Pabellon.pdf", docx: "docx/Reglamento_Comercio_Via_Publica_Pabellon.docx" },
+  espectaculos: { titulo: "Espectáculos y Diversiones Públicas", color: "#f4b400", pdf: "pdfs/Reglamento_Espectaculos_Festejos_Pabellon.pdf", docx: "docx/Reglamento_Espectaculos_Festejos_Pabellon.docx" },
+  capapa: { titulo: "Comisión de Agua Potable y Alcantarillado (CAPAPA)", color: "#2e6ea6", pdf: "pdfs/Reglamento_CAPAPA_Pabellon.pdf", docx: "docx/Reglamento_CAPAPA_Pabellon.docx" },
+  servicios: { titulo: "Servicios Públicos Municipales", color: "#2f8f5b", pdf: "pdfs/Reglamento_Servicios_Publicos_Pabellon.pdf", docx: "docx/Reglamento_Servicios_Publicos_Pabellon.docx" },
+  trabajo: { titulo: "Condiciones de Trabajo", color: "#2f8f5b", pdf: "pdfs/Reglamento_Condiciones_Trabajo_Pabellon.pdf", docx: "docx/Reglamento_Condiciones_Trabajo_Pabellon.docx" },
 };
 
 const params = new URLSearchParams(location.search);
@@ -469,11 +473,18 @@ async function init() {
   document.title = `${cat.titulo} — Lectura | IMBIO`;
   document.querySelector(".topbar").style.borderBottom = `3px solid ${cat.color}`;
   const linkPdf = document.getElementById("linkPdf");
+  const linkDocx = document.getElementById("linkDocx");
   if (cat.pdf) {
     linkPdf.href = cat.pdf;
     linkPdf.hidden = false;
   } else {
     linkPdf.hidden = true;
+  }
+  if (cat.docx) {
+    linkDocx.href = cat.docx;
+    linkDocx.hidden = false;
+  } else {
+    linkDocx.hidden = true;
   }
 
   let arts;
