@@ -156,26 +156,36 @@
     color:var(--texto-sec);background:var(--bg);border-left:3px solid var(--texto-sec);
     border-radius:0 8px 8px 0;line-height:1.5;
   }
-  .articulo-hit .fracciones{
+  .articulo-hit .fracciones,
+  .articulo-hit .incisos,
+  .articulo-hit .subincisos{
     margin:.35rem 0 .8rem; padding:0; list-style:none;
   }
-  .articulo-hit .fracciones li{
-    margin:.4rem 0; padding:.5rem .7rem;
+  .articulo-hit .fracciones > li{
+    margin:.45rem 0; padding:.55rem .75rem;
     border-left:3px solid var(--verde); background:var(--bg);
     border-radius:0 8px 8px 0;
   }
   .articulo-hit .fracciones .num,
-  .articulo-hit .incisos .num{
+  .articulo-hit .incisos .num,
+  .articulo-hit .subincisos .num{
     font-weight:700; color:var(--azul-marino); margin-right:.3rem;
   }
   .articulo-hit .incisos{
-    margin:.45rem 0 .25rem; padding:0; list-style:none;
+    margin:.4rem 0 .15rem .15rem;
   }
-  .articulo-hit .incisos li{
-    margin:.3rem 0; padding:.4rem .65rem;
-    border-left:3px solid var(--azul); background:var(--card);
-    border-radius:0 8px 8px 0; border:1px solid var(--borde);
-    border-left:3px solid var(--azul);
+  .articulo-hit .incisos > li{
+    margin:.28rem 0; padding:.4rem .65rem;
+    background:var(--card); border-radius:0 8px 8px 0;
+    border:1px solid var(--borde); border-left:3px solid var(--azul);
+  }
+  .articulo-hit .subincisos{
+    margin:.35rem 0 .1rem .35rem;
+  }
+  .articulo-hit .subincisos > li{
+    margin:.2rem 0; padding:.3rem .55rem;
+    border-left:2px solid #8aa4bf; border-radius:0 6px 6px 0;
+    background:transparent; font-size:.95rem;
   }
   .sin-hits{color:var(--texto-sec); font-size:.92rem; padding:.6rem 0}
   .cargando{color:var(--texto-sec); font-size:.9rem}
@@ -415,7 +425,7 @@
   <span class="credito">Coordinación, elaboración y soporte: Biólogo Luis Felipe Lozano Román · <a href="mailto:imbio@pabellon.gob.mx">imbio@pabellon.gob.mx</a></span>
 </footer>
 
-<script src="js/formato-legal.js"></script>
+<script src="js/formato-legal.js?v=listas2"></script>
 <script>
 /* ============================================================
    CONFIGURACIÓN — edita estas dos líneas cuando tengas listos
@@ -521,6 +531,8 @@ const SINONIMOS = {
 };
 
 let ARTICULOS = [];
+/** Índice del Código Municipal 2024: clave art. → { articulo, texto } */
+let CODIGO_POR_ART = Object.create(null);
 let INDEX_ORIGEN_CODIGO = Object.create(null);
 let cargaError = false;
 
@@ -578,9 +590,20 @@ function construirIndiceOrigenCodigo() {
   INDEX_ORIGEN_CODIGO = idx;
 }
 
-fetch("data/articulos.json?v=notasEd1")
-  .then(r => r.json())
-  .then(d => { ARTICULOS = d; construirIndiceOrigenCodigo(); llenarSelectReglamentos(); })
+Promise.all([
+  fetch("data/articulos.json?v=notasEd2").then(r => r.json()),
+  fetch("data/codigo_municipal.json?v=notasEd2").then(r => r.json())
+])
+  .then(([arts, codigo]) => {
+    ARTICULOS = arts;
+    CODIGO_POR_ART = {};
+    for (const a of codigo) {
+      const k = normalizaClaveArticuloCodigo(String(a.articulo || ""));
+      if (k) CODIGO_POR_ART[k] = a;
+    }
+    construirIndiceOrigenCodigo();
+    llenarSelectReglamentos();
+  })
   .catch(() => { cargaError = true; });
 
 /* ---------- Tarjetas de reglamentos ---------- */
@@ -772,6 +795,24 @@ document.getElementById("pregunta").addEventListener("keydown", e=>{
   if(e.key==="Enter") preguntar();
 });
 
+function mensajeSinEquivalenciaCodigo(etiqueta) {
+  let art = null;
+  for (const k of clavesArticuloCodigo(etiqueta)) {
+    if (CODIGO_POR_ART[k]) { art = CODIGO_POR_ART[k]; break; }
+  }
+  const hrefCodigo = `lectura.html?doc=codigo#art-${encodeURIComponent(String(etiqueta).replace(/[^\w.-]+/g, "-"))}`;
+  if (!art) {
+    return `El Artículo <b>${escapeHtml(etiqueta)}</b> no aparece en el Código Municipal 2024 de esta consulta.`;
+  }
+  const texto = String(art.texto || "");
+  const derogado = /\bDEROGAD/i.test(texto);
+  if (derogado) {
+    const nota = (texto.match(/\(DEROGADO[^)]*\)/i) || [""])[0];
+    return `El Artículo <b>${escapeHtml(etiqueta)}</b> del Código Municipal 2024 está <b>derogado</b>${nota ? " " + escapeHtml(nota) : ""}, por eso no tiene equivalencia en los reglamentos de esta consulta. Puedes verlo en el <a href="${hrefCodigo}" target="_blank" rel="noopener">Código Municipal</a>.`;
+  }
+  return `El Artículo <b>${escapeHtml(etiqueta)}</b> existe en el Código Municipal 2024, pero no tiene equivalencia registrada en los reglamentos de esta consulta (puede no haberse trasladado con ese número). Puedes consultarlo en el <a href="${hrefCodigo}" target="_blank" rel="noopener">Código Municipal</a>.`;
+}
+
 function buscarCodigoMunicipal() {
   const cont = document.getElementById("codigoResultado");
   const raw = document.getElementById("codigoArt").value.trim();
@@ -792,7 +833,7 @@ function buscarCodigoMunicipal() {
   }
   const etiqueta = clave;
   if (hits.length === 0) {
-    cont.innerHTML = `<div class="sin-hits">No encontramos equivalencia para el Artículo <b>${escapeHtml(etiqueta)}</b> del Código Municipal 2024 en los reglamentos de esta consulta (puede ser que no se haya trasladado o que el número no exista).</div>`;
+    cont.innerHTML = `<div class="sin-hits">${mensajeSinEquivalenciaCodigo(etiqueta)}</div>`;
     return;
   }
   const numCodigo = hits[0].articulo_codigo || etiqueta;
