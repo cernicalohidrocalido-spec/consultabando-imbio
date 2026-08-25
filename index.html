@@ -78,10 +78,28 @@
   .respuesta-ia .etiqueta{font-size:.75rem; text-transform:uppercase; letter-spacing:.04em; color:var(--verde-oscuro); font-weight:700; display:block; margin-bottom:.35rem}
   .articulo-hit{
     border:1px solid var(--borde); border-left:4px solid var(--verde); border-radius:10px;
-    padding:.8rem .95rem; margin-bottom:.65rem; background:var(--card);
+    padding:.9rem 1rem; margin-bottom:.75rem; background:var(--card);
   }
-  .articulo-hit .meta{font-size:.8rem; color:var(--verde-oscuro); font-weight:700; margin-bottom:.3rem}
-  .articulo-hit .texto{font-size:.92rem; color:var(--texto)}
+  .articulo-hit .meta{font-size:.8rem; color:var(--verde-oscuro); font-weight:700; margin-bottom:.55rem; line-height:1.35}
+  .articulo-hit .texto{font-size:.95rem; color:var(--texto); line-height:1.55}
+  .articulo-hit .texto-p{margin:0 0 .7rem}
+  .articulo-hit .texto-p:last-child{margin-bottom:0}
+  .articulo-hit .seccion-titulo{
+    margin:1rem 0 .45rem; font-weight:700; color:var(--verde-oscuro); font-size:.92rem;
+    padding-top:.55rem; border-top:1px solid var(--borde);
+  }
+  .articulo-hit .seccion-titulo:first-child{border-top:none; padding-top:0; margin-top:0}
+  .articulo-hit .fracciones{
+    margin:.35rem 0 .8rem; padding:0; list-style:none;
+  }
+  .articulo-hit .fracciones li{
+    margin:.4rem 0; padding:.5rem .7rem;
+    border-left:3px solid var(--verde); background:var(--bg);
+    border-radius:0 8px 8px 0;
+  }
+  .articulo-hit .fracciones .num{
+    font-weight:700; color:var(--verde-oscuro); margin-right:.3rem;
+  }
   .sin-hits{color:var(--texto-sec); font-size:.92rem; padding:.6rem 0}
   .cargando{color:var(--texto-sec); font-size:.9rem}
 
@@ -342,6 +360,38 @@ function preguntarEjemplo(txt){
   preguntar();
 }
 
+/* Formato de lectura: no altera el texto legal, solo lo presenta con saltos y listas. */
+function escapeHtml(str){
+  return String(str)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;");
+}
+function formatTextoLegal(texto){
+  let s = escapeHtml(texto);
+
+  // Separar encabezados "Sección …"
+  s = s.replace(/\s*(Secci[oó]n\s+[A-ZÁÉÍÓÚÑIVXLCDM]+\.\s*)/gi,
+    '</p><p class="seccion-titulo">$1</p><p class="texto-p">');
+
+  // Fracciones romanas o arábigas: I.- / 1.-
+  if (/(?:^|[:;]\s*)(?:[IVXLCDM]+|\d+)\.-/.test(s)) {
+    s = s.replace(/(:\s*)((?:[IVXLCDM]+|\d+)\.-)\s+/i,
+      '$1</p><ol class="fracciones"><li><span class="num">$2</span> ');
+    s = s.replace(/;\s*((?:[IVXLCDM]+|\d+)\.-)\s+/gi,
+      '</li><li><span class="num">$1</span> ');
+    if (s.includes('<ol class="fracciones">')) {
+      s = s.replace(/(<\/p><p class="seccion-titulo">)/, '</li></ol>$1');
+      if (!s.includes('</ol>')) s += '</li></ol>';
+    }
+  }
+
+  if (!/^\s*</.test(s)) s = `<p class="texto-p">${s}</p>`;
+  s = s.replace(/<p class="texto-p">\s*<\/p>/g, "");
+  return s;
+}
+
 async function preguntar(){
   const pregunta = document.getElementById("pregunta").value.trim();
   const cont = document.getElementById("resultado");
@@ -367,8 +417,8 @@ async function preguntar(){
   // Muestra siempre los artículos reales encontrados (sin IA, funciona siempre)
   let html = hits.map(h => `
     <div class="articulo-hit">
-      <div class="meta">${h.reglamento} — Artículo ${h.articulo}</div>
-      <div class="texto">${h.texto}</div>
+      <div class="meta">${escapeHtml(h.reglamento)} — Artículo ${escapeHtml(String(h.articulo))}</div>
+      <div class="texto">${formatTextoLegal(h.texto)}</div>
     </div>
   `).join("");
 
