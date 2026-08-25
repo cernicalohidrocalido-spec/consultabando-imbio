@@ -9,6 +9,8 @@ Publicación: **GitHub Pages** en el subdominio [consultabando.imbio.info](https
 ```
 /
 ├── index.html          # Sitio autocontenido (HTML + CSS + JS)
+├── lectura.html        # Lector continuo por reglamento (estilo Gutenberg)
+├── js/formato-legal.js # Formateo de fracciones/incisos (compartido)
 ├── CNAME               # Dominio personalizado: consultabando.imbio.info
 ├── data/
 │   └── articulos.json  # 2,277 artículos reales (fuente de verdad legal)

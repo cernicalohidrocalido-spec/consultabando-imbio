@@ -139,6 +139,12 @@
   body.modo-kid .tarjeta p.resumen{display:none}
   body.modo-kid .tarjeta .kid{display:block}
   .tarjeta a.enlace{font-size:.85rem; margin-top:.3rem; font-weight:600}
+  .tarjeta a.enlace-lectura{
+    display:inline-block;margin-top:.5rem;font-size:.9rem;font-weight:700;
+    color:var(--verde-oscuro);text-decoration:none;
+  }
+  .tarjeta a.enlace-lectura:hover{text-decoration:underline}
+  .tarjeta .acciones{margin-top:auto;padding-top:.35rem;display:flex;flex-direction:column;gap:.15rem}
   .sin-resultados{display:none; text-align:center; color:var(--texto-sec); padding:1.5rem}
 
   .cta{
@@ -207,6 +213,7 @@
   <a href="https://imbio.info" target="_blank" rel="noopener">imbio.info</a>
 </footer>
 
+<script src="js/formato-legal.js"></script>
 <script>
 /* ============================================================
    CONFIGURACIÓN — edita estas dos líneas cuando tengas listos
@@ -310,7 +317,10 @@ function tarjetaHTML(r){
     <h3>${r.titulo}</h3>
     <p class="resumen">${r.resumen}</p>
     <p class="kid">${r.kid}</p>
-    <a class="enlace" href="${formLinkFor(r)}" target="_blank" rel="noopener">Enviar duda sobre este reglamento →</a>
+    <div class="acciones">
+      <a class="enlace-lectura" href="lectura.html?doc=${r.id}">Leer el reglamento →</a>
+      <a class="enlace" href="${formLinkFor(r)}" target="_blank" rel="noopener">Enviar duda sobre este reglamento →</a>
+    </div>
   </div>`;
 }
 function render(lista){
@@ -395,70 +405,6 @@ function buscarArticulos(pregunta, maxResultados=15){
 function preguntarEjemplo(txt){
   document.getElementById("pregunta").value = txt;
   preguntar();
-}
-
-/* Formato de lectura: no altera el texto legal, solo lo presenta con saltos y listas. */
-function escapeHtml(str){
-  return String(str)
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;");
-}
-function formatTextoLegal(texto){
-  let s = escapeHtml(texto);
-
-  // Separar encabezados "Sección …"
-  s = s.replace(/\s*(Secci[oó]n\s+[A-ZÁÉÍÓÚÑIVXLCDM]+\.\s*)/gi,
-    '</p><p class="seccion-titulo">$1</p><p class="texto-p">');
-
-  // Incisos a) b) c) — primero, para anidarlos dentro de fracciones
-  if (/[a-z]\)\s/.test(s)) {
-    s = s.replace(/(:\s*)([a-z]\))\s+/gi,
-      '$1<ul class="incisos"><li><span class="num">$2</span> ');
-    s = s.replace(/;\s*([a-z]\))\s+/gi,
-      '</li><li><span class="num">$1</span> ');
-    if (s.includes('<ul class="incisos">')) {
-      // Cerrar antes de la siguiente fracción romana/arábiga
-      s = s.replace(/(?:,\s*)?y\s+((?:[IVXLCDM]+|\d+)\.-)/gi, '</li></ul> $1');
-      s = s.replace(/\.\s+((?:[IVXLCDM]+|\d+)\.-)/g, '.</li></ul> $1');
-      s = s.replace(/;\s+((?:[IVXLCDM]+|\d+)\.-)/g, '</li></ul> $1');
-      // Cerrar listas abiertas solo donde haga falta (antes de Sección o al final)
-      s = s.split('</p><p class="seccion-titulo">').map((part, i, arr) => {
-        if (i === arr.length - 1) return part;
-        const opens = (part.match(/<ul class="incisos">/g) || []).length;
-        const closes = (part.match(/<\/ul>/g) || []).length;
-        let p = part;
-        for (let j = 0; j < opens - closes; j++) p += '</li></ul>';
-        return p;
-      }).join('</p><p class="seccion-titulo">');
-      const opens = (s.match(/<ul class="incisos">/g) || []).length;
-      const closes = (s.match(/<\/ul>/g) || []).length;
-      for (let i = 0; i < opens - closes; i++) s += '</li></ul>';
-    }
-  }
-
-  // Fracciones romanas o arábigas: I.- / 1.-
-  if (/(?:[IVXLCDM]+|\d+)\.-/.test(s)) {
-    s = s.replace(/(:\s*)((?:[IVXLCDM]+|\d+)\.-)\s+/i,
-      '$1</p><ol class="fracciones"><li><span class="num">$2</span> ');
-    s = s.replace(/;\s*((?:[IVXLCDM]+|\d+)\.-)\s+/gi,
-      '</li><li><span class="num">$1</span> ');
-    // Tras cerrar incisos: "</ul> XLI.-" o "</ul> II.-"
-    s = s.replace(/(<\/ul>)\s*((?:[IVXLCDM]+|\d+)\.-)\s+/gi,
-      '$1</li><li><span class="num">$2</span> ');
-    if (s.includes('<ol class="fracciones">')) {
-      s = s.replace(/(<\/p><p class="seccion-titulo">)/, '</li></ol>$1');
-      if (!s.includes('</ol>')) s += '</li></ol>';
-      s = s.replace(/<\/ol><\/p>/g, '</ol>');
-    }
-  }
-
-  if (!/^\s*</.test(s)) s = `<p class="texto-p">${s}</p>`;
-  s = s.replace(/^<\/p>/, "");
-  s = s.replace(/<p class="texto-p">\s*(?=<ol|<ul)/g, "");
-  s = s.replace(/<p class="texto-p">\s*<\/p>/g, "");
-  return s;
 }
 
 async function preguntar(){

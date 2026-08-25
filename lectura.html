@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lectura — Consulta Pública IMBIO</title>
+<style>
+  :root{
+    --verde:#2f8f5b; --verde-oscuro:#1f6b42; --verde-claro:#eaf7ef;
+    --azul:#2e6ea6; --bg:#fbfdfb; --card:#ffffff;
+    --texto:#22301f; --texto-sec:#5a6b57; --borde:#e1ece2;
+    --sombra:0 2px 10px rgba(31,107,66,.08);
+    --toc-w:280px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#12160f; --card:#1a201a; --texto:#eef4ec; --texto-sec:#a9b8a6;
+      --borde:#2a352a; --verde-claro:#16281c;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--texto);font-family:"Segoe UI",system-ui,sans-serif;line-height:1.55}
+  a{color:var(--azul);text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  .topbar{
+    background:linear-gradient(135deg,var(--verde-oscuro),var(--verde));
+    color:#fff;padding:.85rem 1rem;display:flex;flex-wrap:wrap;align-items:center;gap:.6rem 1rem;
+    position:sticky;top:0;z-index:20;
+  }
+  .topbar a.volver{color:#fff;font-weight:600;font-size:.9rem}
+  .topbar h1{margin:0;font-size:1.05rem;flex:1 1 200px;line-height:1.3}
+  .topbar .meta{font-size:.8rem;opacity:.9}
+
+  .layout{display:flex;align-items:flex-start;max-width:1200px;margin:0 auto}
+  .toc{
+    width:var(--toc-w);flex-shrink:0;position:sticky;top:3.5rem;
+    max-height:calc(100vh - 4rem);overflow-y:auto;
+    padding:1rem .75rem 2rem 1rem;border-right:1px solid var(--borde);
+    background:var(--card);
+  }
+  .toc h2{margin:0 0 .6rem;font-size:.85rem;text-transform:uppercase;letter-spacing:.04em;color:var(--verde-oscuro)}
+  #buscaToc{
+    width:100%;padding:.45rem .6rem;border:1px solid var(--borde);border-radius:8px;
+    font-size:.85rem;background:var(--bg);color:var(--texto);margin-bottom:.6rem;
+  }
+  .toc-list{list-style:none;margin:0;padding:0;font-size:.82rem}
+  .toc-list li{margin:0}
+  .toc-list a{
+    display:block;padding:.28rem .4rem;border-radius:6px;color:var(--texto-sec);
+  }
+  .toc-list a:hover,.toc-list a.activo{background:var(--verde-claro);color:var(--verde-oscuro);text-decoration:none}
+  .toc-list a.oculto{display:none}
+
+  .contenido{flex:1;min-width:0;padding:1.2rem 1.4rem 3rem;max-width:720px}
+  .contenido .intro{color:var(--texto-sec);font-size:.9rem;margin:0 0 1.4rem}
+
+  .articulo{
+    margin-bottom:1.8rem;padding-bottom:1.2rem;border-bottom:1px solid var(--borde);
+    scroll-margin-top:4rem;
+  }
+  .articulo:last-child{border-bottom:none}
+  .articulo h3{
+    margin:0 0 .65rem;font-size:1rem;color:var(--verde-oscuro);
+    font-variant-numeric:tabular-nums;
+  }
+  .articulo .texto{font-size:.98rem;line-height:1.6}
+  .articulo .texto-p{margin:0 0 .7rem}
+  .articulo .seccion-titulo{
+    margin:1rem 0 .45rem;font-weight:700;color:var(--verde-oscuro);font-size:.92rem;
+    padding-top:.55rem;border-top:1px solid var(--borde);
+  }
+  .articulo .fracciones,.articulo .incisos{margin:.35rem 0 .8rem;padding:0;list-style:none}
+  .articulo .fracciones li{
+    margin:.4rem 0;padding:.5rem .7rem;border-left:3px solid var(--verde);
+    background:var(--bg);border-radius:0 8px 8px 0;
+  }
+  .articulo .incisos li{
+    margin:.3rem 0;padding:.4rem .65rem;border:1px solid var(--borde);
+    border-left:3px solid var(--azul);border-radius:0 8px 8px 0;
+  }
+  .articulo .num{font-weight:700;color:var(--verde-oscuro);margin-right:.3rem}
+
+  .articulo.resaltado{background:var(--verde-claro);margin-left:-.6rem;margin-right:-.6rem;padding:.6rem;border-radius:10px}
+  .articulo.oculto{display:none}
+
+  .error{padding:2rem;text-align:center;color:var(--texto-sec)}
+  .cargando{padding:2rem;text-align:center;color:var(--texto-sec)}
+
+  .toc-toggle{
+    display:none;margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;
+    padding:.4rem .75rem;border-radius:8px;cursor:pointer;font-size:.85rem;
+  }
+
+  @media (max-width:768px){
+    .layout{flex-direction:column}
+    .toc{
+      width:100%;position:relative;top:0;max-height:none;border-right:none;
+      border-bottom:1px solid var(--borde);display:none;
+    }
+    .toc.abierto{display:block}
+    .toc-toggle{display:block}
+    .contenido{padding:1rem}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="volver" href="index.html">← Volver</a>
+  <h1 id="tituloDoc">Cargando…</h1>
+  <span class="meta" id="metaDoc"></span>
+  <button type="button" class="toc-toggle" id="btnToc" aria-expanded="false">Índice</button>
+</header>
+
+<div class="layout">
+  <aside class="toc" id="panelToc" aria-label="Índice de artículos">
+    <h2>Índice</h2>
+    <input type="search" id="buscaToc" placeholder="Buscar artículo o texto…" autocomplete="off" />
+    <ol class="toc-list" id="tocList"></ol>
+  </aside>
+  <main class="contenido" id="contenido">
+    <p class="cargando">Cargando reglamento…</p>
+  </main>
+</div>
+
+<script src="js/formato-legal.js"></script>
+<script>
+const CATALOGO = {
+  bando: { titulo: "Bando de Policía y Buen Gobierno", color: "#2f8f5b" },
+  actos: { titulo: "Actos y Procedimientos Administrativos", color: "#2f8f5b" },
+  seguridad: { titulo: "Seguridad Pública y Movilidad", color: "#2e6ea6" },
+  urbano: { titulo: "Desarrollo Urbano", color: "#c1622a" },
+  gobierno: { titulo: "Gobierno Interior", color: "#2f8f5b" },
+  patrimonio: { titulo: "Patrimonio Municipal", color: "#c1622a" },
+  biodiversidad: { titulo: "Biodiversidad y Protección Ambiental", color: "#1f6b42" },
+  comercio: { titulo: "Comercio", color: "#f4b400" },
+  espectaculos: { titulo: "Espectáculos y Diversiones Públicas", color: "#f4b400" },
+  capapa: { titulo: "Construcción, Alineamiento, Predios y Anuncios (CAPAPA)", color: "#c1622a" },
+  servicios: { titulo: "Servicios Públicos Municipales", color: "#2f8f5b" },
+  trabajo: { titulo: "Condiciones de Trabajo", color: "#2f8f5b" },
+};
+
+const params = new URLSearchParams(location.search);
+const docId = params.get("doc") || "";
+const hashArt = location.hash.replace(/^#art-/, "");
+
+function numArticulo(a) {
+  const n = parseFloat(String(a.articulo).replace(",", "."));
+  return Number.isFinite(n) ? n : 999999;
+}
+
+function slugArt(n) {
+  return String(n).replace(/[^\w.-]+/g, "-");
+}
+
+function normaliza(s) {
+  return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+function renderError(msg) {
+  document.getElementById("tituloDoc").textContent = "Reglamento no encontrado";
+  document.getElementById("contenido").innerHTML = `<div class="error">${msg}<br><br><a href="index.html">← Volver al inicio</a></div>`;
+  document.getElementById("panelToc").style.display = "none";
+}
+
+async function init() {
+  const cat = CATALOGO[docId];
+  if (!cat) {
+    renderError("No se reconoce el documento solicitado. Elige un reglamento desde la página principal.");
+    return;
+  }
+
+  document.getElementById("tituloDoc").textContent = cat.titulo;
+  document.title = `${cat.titulo} — Lectura | IMBIO`;
+  document.querySelector(".topbar").style.borderBottom = `3px solid ${cat.color}`;
+
+  let todos;
+  try {
+    const r = await fetch("data/articulos.json");
+    todos = await r.json();
+  } catch {
+    renderError("No pude cargar el índice de artículos (data/articulos.json).");
+    return;
+  }
+
+  const arts = todos.filter((a) => a.doc === docId).sort((a, b) => numArticulo(a) - numArticulo(b));
+  if (arts.length === 0) {
+    renderError("Este reglamento no tiene artículos en el índice.");
+    return;
+  }
+
+  const nombreLegal = arts[0].reglamento;
+  document.getElementById("metaDoc").textContent = `${arts.length} artículos · texto oficial`;
+
+  const toc = document.getElementById("tocList");
+  const cuerpo = document.getElementById("contenido");
+
+  toc.innerHTML = arts.map((a) => {
+    const id = slugArt(a.articulo);
+    return `<li><a href="#art-${id}" data-art="${id}">Artículo ${escapeHtml(String(a.articulo))}</a></li>`;
+  }).join("");
+
+  cuerpo.innerHTML = `
+    <p class="intro"><strong>${escapeHtml(nombreLegal)}</strong> — lectura continua con índice. El texto proviene del paquete normativo en consulta pública; no se ha alterado.</p>
+    ${arts.map((a) => {
+      const id = slugArt(a.articulo);
+      return `<article class="articulo" id="art-${id}" data-art="${id}">
+        <h3>Artículo ${escapeHtml(String(a.articulo))}</h3>
+        <div class="texto">${formatTextoLegal(a.texto)}</div>
+      </article>`;
+    }).join("")}
+  `;
+
+  if (hashArt) {
+    const el = document.getElementById("art-" + hashArt);
+    if (el) setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+  }
+
+  document.getElementById("buscaToc").addEventListener("input", (e) => {
+    const q = normaliza(e.target.value.trim());
+    const links = toc.querySelectorAll("a");
+    const articles = cuerpo.querySelectorAll(".articulo");
+    if (!q) {
+      links.forEach((a) => { a.classList.remove("oculto"); });
+      articles.forEach((art) => { art.classList.remove("oculto", "resaltado"); });
+      return;
+    }
+    arts.forEach((a, i) => {
+      const id = slugArt(a.articulo);
+      const txt = normaliza(a.texto);
+      const num = normaliza(String(a.articulo));
+      const match = num.includes(q) || txt.includes(q);
+      links[i].classList.toggle("oculto", !match);
+      articles[i].classList.toggle("oculto", !match);
+      articles[i].classList.toggle("resaltado", match);
+    });
+  });
+
+  document.getElementById("btnToc").addEventListener("click", () => {
+    const panel = document.getElementById("panelToc");
+    const open = panel.classList.toggle("abierto");
+    document.getElementById("btnToc").setAttribute("aria-expanded", open);
+  });
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((en) => {
+        if (en.isIntersecting) {
+          const id = en.target.dataset.art;
+          toc.querySelectorAll("a").forEach((a) => a.classList.toggle("activo", a.dataset.art === id));
+        }
+      });
+    },
+    { rootMargin: "-20% 0px -70% 0px", threshold: 0 }
+  );
+  cuerpo.querySelectorAll(".articulo").forEach((el) => observer.observe(el));
+}
+
+init();
+</script>
+</body>
+</html>
