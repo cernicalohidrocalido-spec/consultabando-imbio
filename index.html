@@ -97,8 +97,18 @@
     border-left:3px solid var(--verde); background:var(--bg);
     border-radius:0 8px 8px 0;
   }
-  .articulo-hit .fracciones .num{
+  .articulo-hit .fracciones .num,
+  .articulo-hit .incisos .num{
     font-weight:700; color:var(--verde-oscuro); margin-right:.3rem;
+  }
+  .articulo-hit .incisos{
+    margin:.45rem 0 .25rem; padding:0; list-style:none;
+  }
+  .articulo-hit .incisos li{
+    margin:.3rem 0; padding:.4rem .65rem;
+    border-left:3px solid var(--azul); background:var(--card);
+    border-radius:0 8px 8px 0; border:1px solid var(--borde);
+    border-left:3px solid var(--azul);
   }
   .sin-hits{color:var(--texto-sec); font-size:.92rem; padding:.6rem 0}
   .cargando{color:var(--texto-sec); font-size:.9rem}
@@ -375,12 +385,33 @@ function formatTextoLegal(texto){
   s = s.replace(/\s*(Secci[oó]n\s+[A-ZÁÉÍÓÚÑIVXLCDM]+\.\s*)/gi,
     '</p><p class="seccion-titulo">$1</p><p class="texto-p">');
 
+  // Incisos a) b) c) — primero, para anidarlos dentro de fracciones
+  if (/[a-z]\)\s/.test(s)) {
+    s = s.replace(/(:\s*)([a-z]\))\s+/gi,
+      '$1<ul class="incisos"><li><span class="num">$2</span> ');
+    s = s.replace(/;\s*([a-z]\))\s+/gi,
+      '</li><li><span class="num">$1</span> ');
+    if (s.includes('<ul class="incisos">')) {
+      // Cerrar antes de la siguiente fracción romana/arábiga
+      s = s.replace(/(?:,\s*)?y\s+((?:[IVXLCDM]+|\d+)\.-)/gi, '</li></ul> $1');
+      s = s.replace(/\.\s+((?:[IVXLCDM]+|\d+)\.-)/g, '.</li></ul> $1');
+      s = s.replace(/;\s+((?:[IVXLCDM]+|\d+)\.-)/g, '</li></ul> $1');
+      s = s.replace(/(<\/p><p class="seccion-titulo">)/g, '</li></ul>$1');
+      const opens = (s.match(/<ul class="incisos">/g) || []).length;
+      const closes = (s.match(/<\/ul>/g) || []).length;
+      for (let i = 0; i < opens - closes; i++) s += '</li></ul>';
+    }
+  }
+
   // Fracciones romanas o arábigas: I.- / 1.-
-  if (/(?:^|[:;]\s*)(?:[IVXLCDM]+|\d+)\.-/.test(s)) {
+  if (/(?:[IVXLCDM]+|\d+)\.-/.test(s)) {
     s = s.replace(/(:\s*)((?:[IVXLCDM]+|\d+)\.-)\s+/i,
       '$1</p><ol class="fracciones"><li><span class="num">$2</span> ');
     s = s.replace(/;\s*((?:[IVXLCDM]+|\d+)\.-)\s+/gi,
       '</li><li><span class="num">$1</span> ');
+    // Tras cerrar incisos: "</ul> XLI.-" o "</ul> II.-"
+    s = s.replace(/(<\/ul>)\s*((?:[IVXLCDM]+|\d+)\.-)\s+/gi,
+      '$1</li><li><span class="num">$2</span> ');
     if (s.includes('<ol class="fracciones">')) {
       s = s.replace(/(<\/p><p class="seccion-titulo">)/, '</li></ol>$1');
       if (!s.includes('</ol>')) s += '</li></ol>';
@@ -389,6 +420,8 @@ function formatTextoLegal(texto){
   }
 
   if (!/^\s*</.test(s)) s = `<p class="texto-p">${s}</p>`;
+  s = s.replace(/^<\/p>/, "");
+  s = s.replace(/<p class="texto-p">\s*(?=<ol|<ul)/g, "");
   s = s.replace(/<p class="texto-p">\s*<\/p>/g, "");
   return s;
 }
