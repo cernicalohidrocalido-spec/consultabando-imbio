@@ -86,9 +86,22 @@
   .articulo .btn-duda{
     display:inline-block;margin-top:.75rem;padding:.45rem .85rem;font-size:.85rem;font-weight:600;
     color:var(--verde-oscuro);background:var(--verde-claro);border:1px solid var(--borde);
-    border-radius:999px;text-decoration:none;
+    border-radius:999px;text-decoration:none;cursor:pointer;font-family:inherit;
   }
-  .articulo .btn-duda:hover{text-decoration:underline}
+  .articulo .btn-duda:hover{background:var(--verde);color:#fff;border-color:var(--verde)}
+  .articulo .btn-duda[aria-expanded="true"]{
+    background:var(--verde-oscuro);color:#fff;border-color:var(--verde-oscuro);
+  }
+  .form-panel{
+    margin-top:.75rem;padding:.85rem;border:1px solid var(--borde);border-radius:12px;
+    background:var(--card);box-shadow:var(--sombra);
+  }
+  .form-panel[hidden]{display:none}
+  .form-panel-hint{margin:0 0 .5rem;font-size:.82rem;color:var(--texto-sec)}
+  .form-panel iframe{
+    display:block;width:100%;min-height:520px;border:none;border-radius:8px;
+    background:var(--bg);
+  }
   .articulo .fracciones,.articulo .incisos{margin:.35rem 0 .8rem;padding:0;list-style:none}
   .articulo .fracciones li{
     margin:.4rem 0;padding:.5rem .7rem;border-left:3px solid var(--verde);
@@ -185,6 +198,47 @@ function renderError(msg) {
   document.getElementById("panelToc").style.display = "none";
 }
 
+function formEmbedUrl(reglamento, articulo) {
+  return `${FORM_URL}?reglamento=${encodeURIComponent(reglamento)}&articulo=${encodeURIComponent(String(articulo))}`;
+}
+
+function toggleFormPanel(btn) {
+  const art = btn.closest(".articulo");
+  const panel = art.querySelector(".form-panel");
+  const abierto = btn.getAttribute("aria-expanded") === "true";
+
+  document.querySelectorAll(".articulo .form-panel").forEach((p) => {
+    if (p !== panel) {
+      p.hidden = true;
+      const f = p.querySelector("iframe");
+      if (f) f.src = "about:blank";
+    }
+  });
+  document.querySelectorAll(".articulo .btn-duda").forEach((b) => {
+    if (b !== btn) {
+      b.setAttribute("aria-expanded", "false");
+      b.textContent = "Enviar duda, comentario o mejora sobre este artículo →";
+    }
+  });
+
+  if (abierto) {
+    panel.hidden = true;
+    btn.setAttribute("aria-expanded", "false");
+    btn.textContent = "Enviar duda, comentario o mejora sobre este artículo →";
+    panel.querySelector("iframe").src = "about:blank";
+    return;
+  }
+
+  panel.hidden = false;
+  btn.setAttribute("aria-expanded", "true");
+  btn.textContent = "Ocultar formulario";
+  const iframe = panel.querySelector("iframe");
+  if (!iframe.src || iframe.src === "about:blank") {
+    iframe.src = btn.dataset.formUrl;
+  }
+  setTimeout(() => panel.scrollIntoView({ behavior: "smooth", block: "nearest" }), 80);
+}
+
 async function init() {
   const cat = CATALOGO[docId];
   if (!cat) {
@@ -226,14 +280,23 @@ async function init() {
     <p class="intro"><strong>${escapeHtml(nombreLegal)}</strong> — lectura continua con índice. El texto proviene del paquete normativo en consulta pública; no se ha alterado.</p>
     ${arts.map((a) => {
       const id = slugArt(a.articulo);
-      const formHref = `${FORM_URL}?reglamento=${encodeURIComponent(a.reglamento)}&articulo=${encodeURIComponent(String(a.articulo))}`;
+      const formUrl = formEmbedUrl(a.reglamento, a.articulo);
       return `<article class="articulo" id="art-${id}" data-art="${id}">
         <h3>Artículo ${escapeHtml(String(a.articulo))}</h3>
         <div class="texto">${formatTextoLegal(a.texto)}</div>
-        <a class="btn-duda" href="${formHref}" target="_blank" rel="noopener">Enviar duda, comentario o mejora sobre este artículo →</a>
+        <button type="button" class="btn-duda" aria-expanded="false" data-form-url="${escapeHtml(formUrl)}">Enviar duda, comentario o mejora sobre este artículo →</button>
+        <div class="form-panel" hidden>
+          <p class="form-panel-hint">Tu observación quedará ligada a <strong>${escapeHtml(a.reglamento)}</strong>, artículo ${escapeHtml(String(a.articulo))}.</p>
+          <iframe title="Formulario de observaciones — ${escapeHtml(a.reglamento)}, artículo ${escapeHtml(String(a.articulo))}" src="about:blank" loading="lazy"></iframe>
+        </div>
       </article>`;
     }).join("")}
   `;
+
+  cuerpo.addEventListener("click", (e) => {
+    const btn = e.target.closest(".btn-duda");
+    if (btn) toggleFormPanel(btn);
+  });
 
   if (hashArt) {
     const el = document.getElementById("art-" + hashArt);
