@@ -384,6 +384,7 @@ function formatTextoLegal(texto){
     if (s.includes('<ol class="fracciones">')) {
       s = s.replace(/(<\/p><p class="seccion-titulo">)/, '</li></ol>$1');
       if (!s.includes('</ol>')) s += '</li></ol>';
+      s = s.replace(/<\/ol><\/p>/g, '</ol>');
     }
   }
 
