@@ -10,6 +10,16 @@ function escapeHtml(str) {
 function formatTextoLegal(texto) {
   let s = escapeHtml(texto);
 
+  // TÍTULO y CAPÍTULO estructurales (p. ej. al cierre de un artículo)
+  s = s.replace(
+    /\s+(TÍTULO|TITULO)\s+(PRIMERO|SEGUNDO|TERCERO|CUARTO|QUINTO|SEXTO|SÉPTIMO|SEPTIMO|OCTAVO|NOVENO|DÉCIMO|DECIMO|UNDÉCIMO|UNDECIMO|DUODÉCIMO|DUODECIMO|[IVXLCDM]+)\s+(.+?)(?=\s+(?:CAPÍTULO|CAPITULO|TÍTULO|TITULO)\s+(?:[IVXLCDM\d]+|PRIMERO|SEGUNDO|TERCERO|CUARTO|QUINTO|SEXTO)|$)/gi,
+    '</p><p class="titulo-norma">TÍTULO $2 $3</p><p class="texto-p">'
+  );
+  s = s.replace(
+    /\s+(CAPÍTULO|CAPITULO)\s+([IVXLCDM]+|\d+)\s+(.+?)(?=\s+(?:CAPÍTULO|CAPITULO|TÍTULO|TITULO|Secci[oó]n)\s|$)/gi,
+    '</p><p class="capitulo-norma">CAPÍTULO $2 — $3</p><p class="texto-p">'
+  );
+
   s = s.replace(
     /\s*(Secci[oó]n\s+[A-ZÁÉÍÓÚÑIVXLCDM]+\.\s*)/gi,
     '</p><p class="seccion-titulo">$1</p><p class="texto-p">'
@@ -49,7 +59,7 @@ function formatTextoLegal(texto) {
 
   if (!/^\s*</.test(s)) s = `<p class="texto-p">${s}</p>`;
   s = s.replace(/^<\/p>/, "");
-  s = s.replace(/<p class="texto-p">\s*(?=<ol|<ul)/g, "");
+  s = s.replace(/<p class="texto-p">\s*(?=<ol|<ul|<p class="titulo-norma|<p class="capitulo-norma)/g, "");
   s = s.replace(/<p class="texto-p">\s*<\/p>/g, "");
   return s;
 }
