@@ -185,13 +185,6 @@
   .paso b{display:block; color:var(--texto); font-size:.95rem; margin-bottom:.2rem}
 
   h2.sec{font-size:1.2rem; color:var(--azul-marino); margin:1.8rem 0 .6rem}
-  .chips{display:flex; flex-wrap:wrap; gap:.4rem; margin-bottom:.6rem}
-  .chip{
-    border:1px solid var(--borde); background:var(--card); color:var(--texto-sec);
-    padding:.35rem .8rem; border-radius:999px; font-size:.82rem; cursor:pointer;
-  }
-  .chip.activo{background:var(--azul-marino); color:#fff; border-color:var(--azul-marino)}
-  #contador{font-size:.82rem; color:var(--texto-sec); margin-bottom:.6rem}
   .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:.9rem}
   .tarjeta{
     background:var(--card); border:1px solid var(--borde); border-radius:14px; padding:1rem;
@@ -352,10 +345,7 @@
   </div>
 
   <h2 class="sec">📚 Los 11 reglamentos derivados</h2>
-  <div class="chips" id="chips"></div>
-  <div id="contador"></div>
   <div class="grid" id="grid"><p class="cargando-regs" id="cargandoRegs">Cargando reglamentos…</p></div>
-  <div class="sin-resultados" id="sinResultados" hidden>No hay reglamentos en esta categoría.</div>
 
   <section class="asistente">
     <h2>🔍 Pregúntale a los reglamentos</h2>
@@ -538,19 +528,6 @@ fetch("data/articulos.json?v=notasEd1")
   .catch(() => { cargaError = true; });
 
 /* ---------- Tarjetas de reglamentos ---------- */
-function chipHTML(){
-  const derivados = reglamentosDerivados();
-  const cats = ["Todos", ...new Set(derivados.map(r=>r.categoria))];
-  document.getElementById("chips").innerHTML = cats.map((c,i)=>
-    `<button class="chip ${i===0?'activo':''}" data-cat="${c}" onclick="setCategoria('${c}')">${c}</button>`
-  ).join("");
-}
-let categoriaActual = "Todos";
-function setCategoria(c){
-  categoriaActual = c;
-  document.querySelectorAll(".chip").forEach(b=>b.classList.toggle("activo", b.dataset.cat===c));
-  filtrar();
-}
 function reglamentosDerivados(){
   return REGLAMENTOS.filter(r => r.id !== "bando");
 }
@@ -624,24 +601,8 @@ function tarjetaHTML(r){
     </div>
   </div>`;
 }
-function render(lista, filtroActivo){
-  const derivados = reglamentosDerivados();
-  document.getElementById("grid").innerHTML = lista.map(tarjetaHTML).join("");
-  document.getElementById("contador").textContent = `${lista.length} de ${derivados.length} reglamentos`;
-  const sin = document.getElementById("sinResultados");
-  const mostrarVacio = filtroActivo && lista.length === 0;
-  sin.hidden = !mostrarVacio;
-  sin.style.display = mostrarVacio ? "block" : "none";
-}
-function filtrar(){
-  const lista = reglamentosDerivados().filter(r => categoriaActual==="Todos" || r.categoria===categoriaActual);
-  render(lista, categoriaActual !== "Todos");
-}
-
-function initTarjetasReglamentos(){
-  categoriaActual = "Todos";
-  chipHTML();
-  filtrar();
+function renderTarjetas(){
+  document.getElementById("grid").innerHTML = reglamentosDerivados().map(tarjetaHTML).join("");
 }
 
 /* ---------- Buscador de artículos reales ---------- */
@@ -850,7 +811,7 @@ document.getElementById("formObservacion").addEventListener("submit", async (e) 
 });
 
 /* ---------- Inicialización ---------- */
-initTarjetasReglamentos();
+renderTarjetas();
 </script>
 </body>
 </html>
