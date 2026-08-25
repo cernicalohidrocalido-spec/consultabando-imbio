@@ -486,21 +486,27 @@ let cargaError = false;
 
 function construirIndiceOrigenCodigo() {
   const idx = Object.create(null);
+  function agregar(a, o, tipo) {
+    const k = String(o.articulo_codigo).trim();
+    if (!k) return;
+    const lista = idx[k] || (idx[k] = []);
+    // Evitar duplicar el mismo reglamento+artículo+tipo
+    if (lista.some((h) => h.doc === a.doc && String(h.articulo) === String(a.articulo) && h.tipo === tipo)) return;
+    lista.push({
+      doc: a.doc,
+      reglamento: a.reglamento,
+      articulo: a.articulo,
+      tipo, // "origen" = equivalencia textual; "tematico" = origen_tematico del Bando
+    });
+  }
   for (const a of ARTICULOS) {
-    for (const o of (a.origen || [])) {
-      const k = String(o.articulo_codigo).trim();
-      if (!k) continue;
-      (idx[k] || (idx[k] = [])).push({
-        doc: a.doc,
-        reglamento: a.reglamento,
-        articulo: a.articulo,
-      });
-    }
+    for (const o of (a.origen || [])) agregar(a, o, "origen");
+    for (const o of (a.origen_tematico || [])) agregar(a, o, "tematico");
   }
   INDEX_ORIGEN_CODIGO = idx;
 }
 
-fetch("data/articulos.json?v=bando20240824")
+fetch("data/articulos.json?v=origenTematico1")
   .then(r => r.json())
   .then(d => { ARTICULOS = d; construirIndiceOrigenCodigo(); llenarSelectReglamentos(); })
   .catch(() => { cargaError = true; });
@@ -721,9 +727,10 @@ document.getElementById("pregunta").addEventListener("keydown", e=>{
 function buscarCodigoMunicipal() {
   const cont = document.getElementById("codigoResultado");
   const raw = document.getElementById("codigoArt").value.trim();
+  // Acepta "1", "artículo 1", "Art. 1", etc.
   const num = raw.replace(/[^\d.]/g, "");
   if (!num) {
-    cont.innerHTML = `<div class="sin-hits">Escribe el número de artículo del Código Municipal 2024 (por ejemplo 1795).</div>`;
+    cont.innerHTML = `<div class="sin-hits">Escribe el número de artículo del Código Municipal 2024 (por ejemplo 1 o 1795).</div>`;
     return;
   }
   if (cargaError || ARTICULOS.length === 0) {
@@ -737,12 +744,17 @@ function buscarCodigoMunicipal() {
   }
   cont.innerHTML =
     `<div class="sin-hits" style="margin-bottom:.5rem">Artículo <b>${escapeHtml(num)}</b> del Código Municipal 2024 quedó en:</div>` +
-    hits.map((h) => `
-      <div class="codigo-hit">
+    hits.map((h) => {
+      const href = `lectura.html?doc=${encodeURIComponent(h.doc)}#art-${encodeURIComponent(String(h.articulo).replace(/[^\w.-]+/g, "-"))}`;
+      const nota = h.tipo === "tematico"
+        ? ` <span style="color:var(--texto-sec);font-size:.85rem">(origen temático en el Bando)</span>`
+        : "";
+      return `<div class="codigo-hit">
         Artículo ${escapeHtml(num)} del Código Municipal 2024 → ahora es el
-        <a href="lectura.html?doc=${encodeURIComponent(h.doc)}#art-${encodeURIComponent(String(h.articulo).replace(/[^\w.-]+/g, "-"))}">Artículo ${escapeHtml(String(h.articulo))}</a>
-        del <strong>${escapeHtml(h.reglamento)}</strong>
-      </div>`).join("");
+        <a href="${href}">Artículo ${escapeHtml(String(h.articulo))}</a>
+        del <strong>${escapeHtml(h.reglamento)}</strong>${nota}
+      </div>`;
+    }).join("");
 }
 
 document.getElementById("codigoArt").addEventListener("keydown", (e) => {
