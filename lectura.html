@@ -387,7 +387,7 @@ async function init() {
 
   let todos;
   try {
-    const r = await fetch("data/articulos.json");
+    const r = await fetch("data/articulos.json?v=origen2024");
     todos = await r.json();
   } catch {
     renderError("No pude cargar el índice de artículos (data/articulos.json).");
