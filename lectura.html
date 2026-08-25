@@ -95,6 +95,26 @@
   .articulo .btn-opinar[aria-expanded="true"]{
     background:var(--azul-marino-claro);color:#fff;border-color:var(--azul-marino-claro);
   }
+  .origen-box{
+    margin:.85rem 0 .35rem;padding:.7rem .85rem;border-radius:10px;
+    background:#eef1f4;border:1px solid #d5dce0;border-left:3px solid #6b7c8c;
+    color:var(--texto-sec);font-size:.86rem;line-height:1.45;
+  }
+  .origen-box .origen-label{margin:0 0 .35rem;color:#3d4a55;font-weight:600}
+  .origen-box details{margin-top:.35rem}
+  .origen-box summary{
+    cursor:pointer;list-style:none;font-weight:600;color:var(--azul-marino);
+    user-select:none;
+  }
+  .origen-box summary::-webkit-details-marker{display:none}
+  .origen-box summary::after{content:" ▾";font-weight:400}
+  .origen-box details[open] summary::after{content:" ▴"}
+  .origen-box .origen-bloque{margin-top:.55rem;padding-top:.55rem;border-top:1px solid #d5dce0}
+  .origen-box .origen-bloque:first-of-type{border-top:none;padding-top:.35rem}
+  .origen-box .origen-bloque .cod-meta{
+    font-size:.78rem;font-weight:700;color:var(--azul-marino);margin-bottom:.35rem;
+  }
+  .origen-box .origen-texto{font-size:.88rem;color:var(--texto);line-height:1.5}
   .form-panel{
     margin-top:.75rem;padding:.85rem;border:1px solid var(--borde);border-radius:12px;
     background:var(--card);box-shadow:var(--sombra);
@@ -223,6 +243,31 @@ function renderError(msg) {
   document.getElementById("tituloDoc").textContent = "Reglamento no encontrado";
   document.getElementById("contenido").innerHTML = `<div class="error">${msg}<br><br><a href="index.html">← Volver al inicio</a></div>`;
   document.getElementById("panelToc").style.display = "none";
+}
+
+function origenHtml(a) {
+  const origen = Array.isArray(a.origen) ? a.origen : [];
+  if (origen.length === 0) return "";
+
+  const nums = origen.map((o) => escapeHtml(String(o.articulo_codigo)));
+  let listaNums;
+  if (nums.length === 1) listaNums = `Artículo ${nums[0]}`;
+  else if (nums.length === 2) listaNums = `Artículos ${nums[0]} y ${nums[1]}`;
+  else listaNums = `Artículos ${nums.slice(0, -1).join(", ")} y ${nums[nums.length - 1]}`;
+
+  const bloques = origen.map((o) => `
+      <div class="origen-bloque">
+        <div class="cod-meta">Código Municipal 2024 — Artículo ${escapeHtml(String(o.articulo_codigo))}</div>
+        <div class="origen-texto">${formatTextoLegal(o.texto || "")}</div>
+      </div>`).join("");
+
+  return `<aside class="origen-box">
+      <p class="origen-label">📜 Origen: Código Municipal 2024, ${listaNums}</p>
+      <details>
+        <summary>Ver texto original</summary>
+        ${bloques}
+      </details>
+    </aside>`;
 }
 
 function formPanelHtml(a) {
@@ -373,6 +418,7 @@ async function init() {
       return `<article class="articulo" id="art-${id}" data-art="${id}">
         <h3>Artículo ${escapeHtml(String(a.articulo))}</h3>
         <div class="texto">${formatTextoLegal(a.texto)}</div>
+        ${origenHtml(a)}
         <button type="button" class="btn-opinar" aria-expanded="false">${BTN_OPINAR}</button>
         ${formPanelHtml(a)}
       </article>`;

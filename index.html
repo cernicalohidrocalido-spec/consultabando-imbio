@@ -65,6 +65,27 @@
     padding:1.3rem; box-shadow:var(--sombra); margin-bottom:1.6rem;
   }
   .asistente h2{margin:0 0 .9rem; font-size:1.25rem; color:var(--azul-marino)}
+  .codigo-busca{
+    background:var(--card); border:1px solid var(--borde); border-radius:16px;
+    padding:1.3rem; box-shadow:var(--sombra); margin-bottom:1.6rem;
+  }
+  .codigo-busca h2{margin:0 0 .35rem; font-size:1.15rem; color:var(--azul-marino)}
+  .codigo-busca p.hint-codigo{margin:0 0 .9rem; color:var(--texto-sec); font-size:.9rem}
+  .codigo-busca .pregunta-row{display:flex; gap:.5rem; flex-wrap:wrap}
+  #codigoArt{
+    flex:1 1 160px; max-width:220px; padding:.75rem .9rem; border-radius:10px; border:1px solid var(--borde);
+    font-size:1rem; background:var(--bg); color:var(--texto);
+  }
+  #btnCodigo{
+    background:var(--azul-marino); color:#fff; border:none; border-radius:10px;
+    padding:.75rem 1.2rem; font-weight:600; cursor:pointer; font-size:.95rem;
+  }
+  #codigoResultado{margin-top:1rem}
+  .codigo-hit{
+    border:1px solid var(--borde); border-left:4px solid var(--azul-marino); border-radius:10px;
+    padding:.85rem 1rem; margin-bottom:.65rem; background:#f7f9fb; font-size:.95rem;
+  }
+  .codigo-hit a{font-weight:700; color:var(--azul-marino)}
   .pregunta-row{display:flex; gap:.5rem; flex-wrap:wrap}
   #pregunta{
     flex:1 1 260px; padding:.75rem .9rem; border-radius:10px; border:1px solid var(--borde);
@@ -242,6 +263,16 @@
     <div id="resultado"></div>
   </section>
 
+  <section class="codigo-busca" id="codigoMunicipal">
+    <h2>📜 Artículo del Código Municipal 2024</h2>
+    <p class="hint-codigo">Escribe un número de artículo del Código vigente y te decimos en qué reglamento nuevo quedó.</p>
+    <div class="pregunta-row">
+      <input id="codigoArt" type="text" inputmode="numeric" placeholder="Ej. 1795" autocomplete="off" />
+      <button type="button" id="btnCodigo" onclick="buscarCodigoMunicipal()">Buscar</button>
+    </div>
+    <div id="codigoResultado"></div>
+  </section>
+
   <div class="cta" id="consulta">
     <h2 style="margin-top:0">✍️ ¿Tienes una duda u observación?</h2>
     <p>Cuéntanos qué piensas de los reglamentos. Todas las observaciones se revisan antes de presentar el paquete a Cabildo.</p>
@@ -357,11 +388,28 @@ const SINONIMOS = {
 };
 
 let ARTICULOS = [];
+let INDEX_ORIGEN_CODIGO = Object.create(null);
 let cargaError = false;
+
+function construirIndiceOrigenCodigo() {
+  const idx = Object.create(null);
+  for (const a of ARTICULOS) {
+    for (const o of (a.origen || [])) {
+      const k = String(o.articulo_codigo).trim();
+      if (!k) continue;
+      (idx[k] || (idx[k] = [])).push({
+        doc: a.doc,
+        reglamento: a.reglamento,
+        articulo: a.articulo,
+      });
+    }
+  }
+  INDEX_ORIGEN_CODIGO = idx;
+}
 
 fetch("data/articulos.json")
   .then(r => r.json())
-  .then(d => { ARTICULOS = d; llenarSelectReglamentos(); })
+  .then(d => { ARTICULOS = d; construirIndiceOrigenCodigo(); llenarSelectReglamentos(); })
   .catch(() => { cargaError = true; });
 
 /* ---------- Tarjetas de reglamentos ---------- */
@@ -568,6 +616,37 @@ async function preguntar(){
 
 document.getElementById("pregunta").addEventListener("keydown", e=>{
   if(e.key==="Enter") preguntar();
+});
+
+function buscarCodigoMunicipal() {
+  const cont = document.getElementById("codigoResultado");
+  const raw = document.getElementById("codigoArt").value.trim();
+  const num = raw.replace(/[^\d.]/g, "");
+  if (!num) {
+    cont.innerHTML = `<div class="sin-hits">Escribe el número de artículo del Código Municipal 2024 (por ejemplo 1795).</div>`;
+    return;
+  }
+  if (cargaError || ARTICULOS.length === 0) {
+    cont.innerHTML = `<div class="sin-hits">Aún se está cargando el índice de artículos. Intenta de nuevo en un momento.</div>`;
+    return;
+  }
+  const hits = INDEX_ORIGEN_CODIGO[num] || [];
+  if (hits.length === 0) {
+    cont.innerHTML = `<div class="sin-hits">No encontramos equivalencia para el Artículo <b>${escapeHtml(num)}</b> del Código Municipal 2024 en los reglamentos de esta consulta (puede ser que no se haya trasladado o que el número no exista).</div>`;
+    return;
+  }
+  cont.innerHTML =
+    `<div class="sin-hits" style="margin-bottom:.5rem">Artículo <b>${escapeHtml(num)}</b> del Código Municipal 2024 quedó en:</div>` +
+    hits.map((h) => `
+      <div class="codigo-hit">
+        Artículo ${escapeHtml(num)} del Código Municipal 2024 → ahora es el
+        <a href="lectura.html?doc=${encodeURIComponent(h.doc)}#art-${encodeURIComponent(String(h.articulo).replace(/[^\w.-]+/g, "-"))}">Artículo ${escapeHtml(String(h.articulo))}</a>
+        del <strong>${escapeHtml(h.reglamento)}</strong>
+      </div>`).join("");
+}
+
+document.getElementById("codigoArt").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") buscarCodigoMunicipal();
 });
 
 document.getElementById("resultado").addEventListener("click", (e) => {
