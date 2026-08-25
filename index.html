@@ -330,6 +330,16 @@
     </div>
   </div>
 
+  <section class="codigo-busca" id="codigoMunicipal">
+    <h2>📜 Artículo del Código Municipal 2024</h2>
+    <p class="hint-codigo">Escribe un número de artículo del Código vigente y te decimos en qué reglamento nuevo quedó.</p>
+    <div class="pregunta-row">
+      <input id="codigoArt" type="text" inputmode="numeric" placeholder="Ej. 1795" autocomplete="off" />
+      <button type="button" id="btnCodigo" onclick="buscarCodigoMunicipal()">Buscar</button>
+    </div>
+    <div id="codigoResultado"></div>
+  </section>
+
   <div class="bando-card" id="bando">
     <span class="etiqueta-fuente">Documento marco</span>
     <h3>Bando de Policía y Buen Gobierno</h3>
@@ -351,16 +361,6 @@
       <button id="btnPreguntar" onclick="preguntar()">Buscar</button>
     </div>
     <div id="resultado"></div>
-  </section>
-
-  <section class="codigo-busca" id="codigoMunicipal">
-    <h2>📜 Artículo del Código Municipal 2024</h2>
-    <p class="hint-codigo">Escribe un número de artículo del Código vigente y te decimos en qué reglamento nuevo quedó.</p>
-    <div class="pregunta-row">
-      <input id="codigoArt" type="text" inputmode="numeric" placeholder="Ej. 1795" autocomplete="off" />
-      <button type="button" id="btnCodigo" onclick="buscarCodigoMunicipal()">Buscar</button>
-    </div>
-    <div id="codigoResultado"></div>
   </section>
 
   <div class="cta" id="consulta">
