@@ -91,7 +91,39 @@
     color:var(--azul-marino);background:var(--verde-claro);border:1px solid var(--borde);
     border-radius:999px;text-decoration:none;cursor:pointer;font-family:inherit;
   }
-  .articulo .btn-opinar:hover{background:var(--azul-marino);color:#fff;border-color:var(--azul-marino);text-decoration:none}
+  .articulo .btn-opinar:hover{background:var(--azul-marino);color:#fff;border-color:var(--azul-marino)}
+  .articulo .btn-opinar[aria-expanded="true"]{
+    background:var(--azul-marino-claro);color:#fff;border-color:var(--azul-marino-claro);
+  }
+  .form-panel{
+    margin-top:.75rem;padding:.85rem;border:1px solid var(--borde);border-radius:12px;
+    background:var(--card);box-shadow:var(--sombra);
+  }
+  .form-panel-hint{margin:0 0 .75rem;font-size:.82rem;color:var(--texto-sec)}
+  .form-panel .ctx{
+    margin:0 0 .85rem;padding:.55rem .7rem;font-size:.85rem;
+    background:var(--verde-claro);border-radius:8px;color:var(--azul-marino);
+  }
+  .form-inline{display:grid;gap:.65rem}
+  .form-inline label{font-size:.82rem;font-weight:600;color:var(--texto)}
+  .form-inline input,.form-inline textarea{
+    width:100%;padding:.55rem .65rem;border:1px solid var(--borde);border-radius:8px;
+    font-size:.92rem;font-family:inherit;background:var(--bg);color:var(--texto);
+  }
+  .form-inline textarea{min-height:120px;resize:vertical}
+  .form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}
+  .form-inline .hint{font-size:.75rem;color:var(--texto-sec);font-weight:400}
+  .form-inline button[type="submit"]{
+    margin-top:.25rem;padding:.65rem 1.1rem;background:var(--verde);color:#fff;
+    border:none;border-radius:999px;font-weight:700;font-size:.92rem;cursor:pointer;
+  }
+  .form-inline button[type="submit"]:hover{background:var(--verde-oscuro)}
+  .form-ok{
+    padding:.85rem;background:var(--verde-claro);border-radius:10px;
+    color:var(--azul-marino);font-size:.92rem;
+  }
+  .submit-frame{display:none;width:0;height:0;border:none}
+  @media (max-width:520px){.form-row-2{grid-template-columns:1fr}}
   .articulo .fracciones,.articulo .incisos{margin:.35rem 0 .8rem;padding:0;list-style:none}
   .articulo .fracciones li{
     margin:.4rem 0;padding:.5rem .7rem;border-left:3px solid var(--verde);
@@ -150,11 +182,9 @@
 <script src="js/formato-legal.js"></script>
 <script>
 const FORM_URL = "https://form.jotform.com/262358713140049";
-// Unique Names reales del formulario Jotform (Prefill Field):
-//   q5_dropdown3 = "Selecciona el reglamento..."
-//   q6_textbox4  = "Número de artículo relacionado (si aplica)"
-const JF_REG = "q5_dropdown3";
-const JF_ART = "q6_textbox4";
+const FORM_SUBMIT = "https://submit.jotform.com/submit/262358713140049";
+const FORM_ID = "262358713140049";
+const BTN_OPINAR = "💬 Opinar sobre este artículo";
 
 const CATALOGO = {
   bando: { titulo: "Bando de Policía y Buen Gobierno", color: "#2f8f5b" },
@@ -194,12 +224,91 @@ function renderError(msg) {
   document.getElementById("panelToc").style.display = "none";
 }
 
-function formPrefillUrl(reglamento, articulo) {
-  // El valor del dropdown debe coincidir EXACTAMENTE con una opción de Jotform.
-  const qs = new URLSearchParams();
-  qs.set(JF_REG, reglamento);
-  qs.set(JF_ART, String(articulo));
-  return `${FORM_URL}?${qs.toString()}`;
+function formPanelHtml(a) {
+  const id = slugArt(a.articulo);
+  const regVal = escapeHtml(a.reglamento);
+  const artVal = escapeHtml(String(a.articulo));
+  const frameName = `jf_${id}`;
+  return `<div class="form-panel" hidden>
+    <p class="form-panel-hint">Tu observación se envía al IMBIO y queda ligada a este artículo.</p>
+    <p class="ctx"><strong>${escapeHtml(a.reglamento)}</strong> · Artículo ${artVal}</p>
+    <div class="form-ok" hidden>Gracias. Tu observación fue enviada y será revisada por el IMBIO.</div>
+    <form class="form-inline" method="post" action="${FORM_SUBMIT}" target="${frameName}" data-art-form="${id}">
+      <input type="hidden" name="formID" value="${FORM_ID}" />
+      <input type="hidden" name="simple_spc" value="${FORM_ID}-${FORM_ID}" />
+      <input type="hidden" name="q5_q5_dropdown3" value="${regVal}" />
+      <input type="hidden" name="q6_q6_textbox4" value="${artVal}" />
+      <input type="hidden" name="submitSource" value="embedded" />
+      <div class="form-row-2">
+        <div>
+          <label for="first_${id}">Nombre <span class="hint">(opcional)</span></label>
+          <input type="text" id="first_${id}" name="q2_q2_name0[first]" autocomplete="given-name" />
+        </div>
+        <div>
+          <label for="last_${id}">Apellido <span class="hint">(opcional)</span></label>
+          <input type="text" id="last_${id}" name="q2_q2_name0[last]" autocomplete="family-name" />
+        </div>
+      </div>
+      <div>
+        <label for="email_${id}">Correo electrónico <span class="hint">(opcional)</span></label>
+        <input type="email" id="email_${id}" name="q3_q3_email1" autocomplete="email" />
+      </div>
+      <div>
+        <label for="phone_${id}">Teléfono de contacto <span class="hint">(opcional)</span></label>
+        <input type="tel" id="phone_${id}" name="q4_q4_phone2[full]" autocomplete="tel" placeholder="(000) 000-0000" />
+      </div>
+      <div>
+        <label for="msg_${id}">Tu duda, comentario u observación</label>
+        <textarea id="msg_${id}" name="q7_q7_textarea5" required placeholder="Escribe aquí tu observación sobre este artículo…"></textarea>
+      </div>
+      <button type="submit">Enviar observación</button>
+    </form>
+    <iframe class="submit-frame" name="${frameName}" title="Envío de formulario"></iframe>
+  </div>`;
+}
+
+function toggleFormPanel(btn) {
+  const art = btn.closest(".articulo");
+  const panel = art.querySelector(".form-panel");
+  const abierto = btn.getAttribute("aria-expanded") === "true";
+
+  document.querySelectorAll(".articulo .form-panel").forEach((p) => {
+    if (p !== panel) {
+      p.hidden = true;
+      const ok = p.querySelector(".form-ok");
+      const f = p.querySelector(".form-inline");
+      if (ok && f) { ok.hidden = true; f.hidden = false; }
+    }
+  });
+  document.querySelectorAll(".articulo .btn-opinar").forEach((b) => {
+    if (b !== btn) {
+      b.setAttribute("aria-expanded", "false");
+      b.textContent = BTN_OPINAR;
+    }
+  });
+
+  if (abierto) {
+    panel.hidden = true;
+    btn.setAttribute("aria-expanded", "false");
+    btn.textContent = BTN_OPINAR;
+    return;
+  }
+
+  panel.hidden = false;
+  btn.setAttribute("aria-expanded", "true");
+  btn.textContent = "Ocultar formulario";
+  setTimeout(() => panel.scrollIntoView({ behavior: "smooth", block: "nearest" }), 80);
+}
+
+function onFormSubmit(form) {
+  const panel = form.closest(".form-panel");
+  const frame = panel.querySelector(".submit-frame");
+  frame.onload = () => {
+    form.hidden = true;
+    panel.querySelector(".form-ok").hidden = false;
+    panel.querySelector(".form-panel-hint").hidden = true;
+    panel.querySelector(".ctx").hidden = true;
+  };
 }
 
 async function init() {
@@ -243,14 +352,23 @@ async function init() {
     <p class="intro"><strong>${escapeHtml(nombreLegal)}</strong> — lectura continua con índice. El texto proviene del paquete normativo en consulta pública; no se ha alterado.</p>
     ${arts.map((a) => {
       const id = slugArt(a.articulo);
-      const opinarHref = formPrefillUrl(a.reglamento, a.articulo);
       return `<article class="articulo" id="art-${id}" data-art="${id}">
         <h3>Artículo ${escapeHtml(String(a.articulo))}</h3>
         <div class="texto">${formatTextoLegal(a.texto)}</div>
-        <a class="btn-opinar" href="${escapeHtml(opinarHref)}" target="_blank" rel="noopener">💬 Opinar sobre este artículo</a>
+        <button type="button" class="btn-opinar" aria-expanded="false">${BTN_OPINAR}</button>
+        ${formPanelHtml(a)}
       </article>`;
     }).join("")}
   `;
+
+  cuerpo.addEventListener("click", (e) => {
+    const btn = e.target.closest(".btn-opinar");
+    if (btn) toggleFormPanel(btn);
+  });
+  cuerpo.addEventListener("submit", (e) => {
+    const form = e.target.closest(".form-inline");
+    if (form) onFormSubmit(form);
+  });
 
   if (hashArt) {
     const el = document.getElementById("art-" + hashArt);
