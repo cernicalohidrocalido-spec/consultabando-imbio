@@ -180,6 +180,12 @@
   .error{padding:2rem;text-align:center;color:var(--texto-sec)}
   .cargando{padding:2rem;text-align:center;color:var(--texto-sec)}
 
+  /* Mientras se carga un enlace profundo (#art-N), ocultar el layout para no
+     mostrar el scroll desde el inicio del documento hasta el artículo. */
+  html.esperando-ancla{overflow:hidden}
+  html.esperando-ancla .layout{opacity:0;pointer-events:none}
+  html.esperando-ancla .topbar .meta::after{content:" · ubicando artículo…";opacity:.9}
+
   .toc-toggle{
     display:none;margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;
     padding:.4rem .75rem;border-radius:8px;cursor:pointer;font-size:.85rem;
@@ -249,7 +255,30 @@ const CATALOGO = {
 
 const params = new URLSearchParams(location.search);
 const docId = params.get("doc") || "";
+const hashInicial = location.hash.replace(/^#art-/, "");
+if (hashInicial) {
+  try { history.scrollRestoration = "manual"; } catch (_) {}
+  document.documentElement.classList.add("esperando-ancla");
+}
 
+function irAlArticulo(slug, { revelar = false } = {}) {
+  const el = document.getElementById("art-" + slug);
+  if (!el) {
+    if (revelar) document.documentElement.classList.remove("esperando-ancla");
+    return false;
+  }
+  const topbar = document.querySelector(".topbar");
+  const offset = (topbar ? topbar.offsetHeight : 0) + 8;
+  const y = el.getBoundingClientRect().top + window.pageYOffset - offset;
+  window.scrollTo(0, Math.max(0, y));
+  if (revelar) {
+    // Esperar un frame de layout para que el scroll ya esté aplicado al revelar.
+    requestAnimationFrame(() => {
+      document.documentElement.classList.remove("esperando-ancla");
+    });
+  }
+  return true;
+}
 function numArticulo(a) {
   const raw = String(a.articulo || "");
   const m = raw.match(/^(\d+(?:[.,]\d+)?)/);
@@ -526,14 +555,17 @@ async function init() {
     cuerpo.addEventListener("submit", onFormSubmit);
   }
 
-  function scrollToHash() {
+  function scrollToHash(revelar) {
     const hash = location.hash.replace(/^#art-/, "");
-    if (!hash) return;
-    const el = document.getElementById("art-" + hash);
-    if (el) setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
+    if (!hash) {
+      if (revelar) document.documentElement.classList.remove("esperando-ancla");
+      return;
+    }
+    irAlArticulo(hash, { revelar: !!revelar });
   }
-  scrollToHash();
-  window.addEventListener("hashchange", scrollToHash);
+  // Salto instantáneo (sin animación) y revelar solo cuando ya estamos en el artículo.
+  scrollToHash(true);
+  window.addEventListener("hashchange", () => scrollToHash(false));
 
   document.getElementById("buscaToc").addEventListener("input", (e) => {
     const q = normaliza(e.target.value.trim());
