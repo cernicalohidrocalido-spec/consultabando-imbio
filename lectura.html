@@ -276,13 +276,18 @@ function origenHtml(a) {
         <div class="origen-texto">${formatTextoLegal(o.texto || "")}</div>
       </div>`).join("");
 
+  // Query distinta por artículo para que el navegador no reutilice
+  // la pestaña del PDF abierta antes (p. ej. siempre en el 1111).
+  const pdfKey = origen.map((o) => String(o.articulo_codigo)).join(",");
+  const pdfHref = `pdfs/Codigo_Municipal_v2024.pdf?origen=${encodeURIComponent(pdfKey)}`;
+
   return `<aside class="origen-box">
       <p class="origen-label">📜 Origen: Código Municipal 2024, ${listaNums}</p>
       <details>
         <summary>Ver texto original</summary>
         ${bloques}
       </details>
-      <a class="pdf-codigo" href="pdfs/Codigo_Municipal_v2024.pdf" target="_blank" rel="noopener">Ver PDF completo del Código →</a>
+      <a class="pdf-codigo" href="${pdfHref}" target="codigoMunicipalPdf" rel="noopener">Ver PDF completo del Código →</a>
     </aside>`;
 }
 
@@ -410,7 +415,7 @@ async function init() {
 
   let todos;
   try {
-    const r = await fetch("data/articulos.json?v=bando56");
+    const r = await fetch("data/articulos.json?v=pdfOrigen1");
     todos = await r.json();
   } catch {
     renderError("No pude cargar el índice de artículos (data/articulos.json).");

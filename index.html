@@ -506,7 +506,7 @@ function construirIndiceOrigenCodigo() {
   INDEX_ORIGEN_CODIGO = idx;
 }
 
-fetch("data/articulos.json?v=bando56")
+fetch("data/articulos.json?v=pdfOrigen1")
   .then(r => r.json())
   .then(d => { ARTICULOS = d; construirIndiceOrigenCodigo(); llenarSelectReglamentos(); })
   .catch(() => { cargaError = true; });
@@ -759,6 +759,16 @@ function buscarCodigoMunicipal() {
 
 document.getElementById("codigoArt").addEventListener("keydown", (e) => {
   if (e.key === "Enter") buscarCodigoMunicipal();
+});
+// Evitar que queden resultados de una búsqueda anterior (p. ej. 1111)
+// mientras se escribe otro número o se vuelve con el historial del navegador.
+document.getElementById("codigoArt").addEventListener("input", () => {
+  document.getElementById("codigoResultado").innerHTML = "";
+});
+window.addEventListener("pageshow", (e) => {
+  if (!e.persisted) return;
+  const raw = document.getElementById("codigoArt").value.trim();
+  if (!raw) document.getElementById("codigoResultado").innerHTML = "";
 });
 
 document.getElementById("resultado").addEventListener("click", (e) => {
