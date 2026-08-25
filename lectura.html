@@ -303,9 +303,9 @@ function origenHtml(a) {
     const href = hrefCodigoArt(num);
     return `
       <div class="origen-bloque">
-        <div class="cod-meta"><a href="${href}">Código Municipal 2024 — Artículo ${escapeHtml(num)}</a></div>
+        <div class="cod-meta"><a href="${href}" target="_blank" rel="noopener">Código Municipal 2024 — Artículo ${escapeHtml(num)}</a></div>
         <div class="origen-texto">${formatTextoLegal(o.texto || "")}</div>
-        <a class="link-codigo" href="${href}">Consultar artículo ${escapeHtml(num)} en el Código →</a>
+        <a class="link-codigo" href="${href}" target="_blank" rel="noopener">Consultar artículo ${escapeHtml(num)} en el Código →</a>
       </div>`;
   }).join("");
 
@@ -318,7 +318,7 @@ function origenHtml(a) {
         <summary>Ver texto original</summary>
         ${bloques}
       </details>
-      <a class="link-codigo" href="${hrefPrimero}">Consultar en el Código (HTML) →</a>
+      <a class="link-codigo" href="${hrefPrimero}" target="_blank" rel="noopener">Consultar en el Código (HTML) →</a>
       <a class="pdf-codigo" href="pdfs/Codigo_Municipal_v2024.pdf" target="_blank" rel="noopener">Ver PDF completo del Código →</a>
     </aside>`;
 }

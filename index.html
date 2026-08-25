@@ -336,7 +336,7 @@
     <h3>Código Municipal de Pabellón de Arteaga (versión 2024)</h3>
     <p>Es el ordenamiento municipal vigente del cual se derivan el Bando y los 11 reglamentos nuevos: cada uno tomó y reorganizó las partes que le correspondían. Puedes leerlo artículo por artículo (solo consulta) o descargar el PDF completo.</p>
     <div class="acciones">
-      <a class="btn-lectura" href="lectura.html?doc=codigo">Leer el Código →</a>
+      <a class="btn-lectura" href="lectura.html?doc=codigo" target="_blank" rel="noopener">Leer el Código →</a>
       <a class="btn-pdf" href="pdfs/Codigo_Municipal_v2024.pdf" target="_blank" rel="noopener">📄 Descargar PDF completo</a>
     </div>
   </div>
@@ -791,7 +791,7 @@ function buscarCodigoMunicipal() {
         ? ` <span style="color:var(--texto-sec);font-size:.85rem">(origen temático en el Bando)</span>`
         : "";
       return `<div class="codigo-hit">
-        <a href="${hrefCodigo}">Artículo ${escapeHtml(num)}</a> del Código Municipal 2024 → ahora es el
+        <a href="${hrefCodigo}" target="_blank" rel="noopener">Artículo ${escapeHtml(num)}</a> del Código Municipal 2024 → ahora es el
         <a href="${href}">Artículo ${escapeHtml(String(h.articulo))}</a>
         del <strong>${escapeHtml(h.reglamento)}</strong>${nota}
       </div>`;
