@@ -121,6 +121,11 @@
     font-size:.78rem;font-weight:700;color:var(--azul-marino);margin-bottom:.35rem;
   }
   .origen-box .origen-texto{font-size:.88rem;color:var(--texto);line-height:1.5}
+  .origen-box a.pdf-codigo{
+    display:inline-block;margin-top:.55rem;font-size:.82rem;font-weight:600;
+    color:var(--azul-marino);text-decoration:none;
+  }
+  .origen-box a.pdf-codigo:hover{text-decoration:underline}
   .form-panel{
     margin-top:.75rem;padding:.85rem;border:1px solid var(--borde);border-radius:12px;
     background:var(--card);box-shadow:var(--sombra);
@@ -274,6 +279,7 @@ function origenHtml(a) {
         <summary>Ver texto original</summary>
         ${bloques}
       </details>
+      <a class="pdf-codigo" href="pdfs/Codigo_Municipal_v2024.pdf" target="_blank" rel="noopener">Ver PDF completo del Código →</a>
     </aside>`;
 }
 

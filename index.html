@@ -199,6 +199,28 @@
   .tarjeta .acciones{margin-top:auto;padding-top:.35rem;display:flex;flex-direction:column;gap:.15rem}
   .sin-resultados{display:none; text-align:center; color:var(--texto-sec); padding:1.5rem}
 
+  .fuente-sec{
+    margin:0 0 .75rem; font-size:1.05rem; color:var(--azul-marino);
+    display:flex; align-items:center; gap:.4rem;
+  }
+  .fuente-card{
+    background:linear-gradient(135deg,#f4f6f8,#eef2f6);
+    border:1px dashed #9aa8b5; border-radius:16px; padding:1.25rem 1.35rem;
+    margin-bottom:1.8rem; box-shadow:none;
+  }
+  .fuente-card .etiqueta-fuente{
+    display:inline-block; font-size:.72rem; font-weight:700; letter-spacing:.08em;
+    text-transform:uppercase; color:#5a6b7a; margin-bottom:.45rem;
+  }
+  .fuente-card h3{margin:0 0 .5rem; font-size:1.12rem; color:var(--azul-marino)}
+  .fuente-card p{margin:0 0 1rem; font-size:.92rem; color:var(--texto-sec); line-height:1.5; max-width:640px}
+  .fuente-card a.btn-pdf{
+    display:inline-block; background:var(--azul-marino); color:#fff;
+    padding:.65rem 1.2rem; border-radius:999px; font-weight:700; font-size:.92rem;
+    text-decoration:none;
+  }
+  .fuente-card a.btn-pdf:hover{background:var(--azul-marino-claro); text-decoration:none}
+
   .cta{
     margin-top:2rem; background:var(--verde-claro); border-radius:16px; padding:1.4rem; text-align:left;
   }
@@ -248,6 +270,14 @@
     <div class="paso"><b>1. Explora</b>Abre el reglamento que te afecta (tarjetas abajo) y léelo artículo por artículo.</div>
     <div class="paso"><b>2. Pregunta</b>Si no sabes en cuál buscar, escribe un tema (por ejemplo "tianguis" o "ruido") y te mostramos los artículos reales.</div>
     <div class="paso"><b>3. Opina</b>Desde cualquier artículo, o con el botón de contacto, envía tu observación.</div>
+  </div>
+
+  <h2 class="fuente-sec">📖 Documento fuente</h2>
+  <div class="fuente-card">
+    <span class="etiqueta-fuente">Ordenamiento vigente</span>
+    <h3>Código Municipal de Pabellón de Arteaga (versión 2024)</h3>
+    <p>Es el ordenamiento municipal vigente del cual se derivan el Bando y los 11 reglamentos nuevos: cada uno tomó y reorganizó las partes que le correspondían. Aquí puedes consultarlo o descargarlo completo.</p>
+    <a class="btn-pdf" href="pdfs/Codigo_Municipal_v2024.pdf" target="_blank" rel="noopener">📄 Descargar PDF completo</a>
   </div>
 
   <h2 class="sec">📚 Los 12 documentos</h2>
