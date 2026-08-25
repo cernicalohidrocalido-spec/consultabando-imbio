@@ -10,6 +10,12 @@ function escapeHtml(str) {
 function formatTextoLegal(texto) {
   let s = escapeHtml(texto);
 
+  // Notas editoriales (no son texto normativo; se muestran aparte en cursiva)
+  s = s.replace(
+    /\s*(Nota editorial(?:\s*\([^)]*\))?:\s*.+?)(?=\s+(?:TÍTULO|TITULO|CAPÍTULO|CAPITULO|Secci[oó]n)\s|$)/gi,
+    '</p><p class="nota-editorial">$1</p><p class="texto-p">'
+  );
+
   // TÍTULO y CAPÍTULO estructurales (p. ej. al cierre de un artículo)
   s = s.replace(
     /\s+(TÍTULO|TITULO)\s+(PRIMERO|SEGUNDO|TERCERO|CUARTO|QUINTO|SEXTO|SÉPTIMO|SEPTIMO|OCTAVO|NOVENO|DÉCIMO|DECIMO|UNDÉCIMO|UNDECIMO|DUODÉCIMO|DUODECIMO|[IVXLCDM]+)\s+(.+?)(?=\s+(?:CAPÍTULO|CAPITULO|TÍTULO|TITULO)\s+(?:[IVXLCDM\d]+|PRIMERO|SEGUNDO|TERCERO|CUARTO|QUINTO|SEXTO)|$)/gi,
@@ -59,7 +65,7 @@ function formatTextoLegal(texto) {
 
   if (!/^\s*</.test(s)) s = `<p class="texto-p">${s}</p>`;
   s = s.replace(/^<\/p>/, "");
-  s = s.replace(/<p class="texto-p">\s*(?=<ol|<ul|<p class="titulo-norma|<p class="capitulo-norma)/g, "");
+  s = s.replace(/<p class="texto-p">\s*(?=<ol|<ul|<p class="titulo-norma|<p class="capitulo-norma|<p class="nota-editorial)/g, "");
   s = s.replace(/<p class="texto-p">\s*<\/p>/g, "");
   return s;
 }
