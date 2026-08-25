@@ -258,7 +258,10 @@ function renderError(msg) {
 }
 
 function origenHtml(a) {
-  const origen = Array.isArray(a.origen) ? a.origen : [];
+  const origenDirecto = Array.isArray(a.origen) ? a.origen : [];
+  const origenTematico = Array.isArray(a.origen_tematico) ? a.origen_tematico : [];
+  // Bando usa origen_tematico; el resto usa origen. Preferir origen si hay ambos.
+  const origen = origenDirecto.length ? origenDirecto : origenTematico;
   if (origen.length === 0) return "";
 
   const nums = origen.map((o) => escapeHtml(String(o.articulo_codigo)));
@@ -407,7 +410,7 @@ async function init() {
 
   let todos;
   try {
-    const r = await fetch("data/articulos.json?v=bando20240824");
+    const r = await fetch("data/articulos.json?v=origenTematico1");
     todos = await r.json();
   } catch {
     renderError("No pude cargar el índice de artículos (data/articulos.json).");
