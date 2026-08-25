@@ -34,6 +34,12 @@
   .topbar a.volver{color:#fff;font-weight:600;font-size:.9rem}
   .topbar h1{margin:0;font-size:1.02rem;flex:1 1 180px;line-height:1.3;font-weight:700}
   .topbar .meta{font-size:.8rem;opacity:.9}
+  .topbar a.pdf-doc{
+    color:#fff;font-weight:600;font-size:.82rem;white-space:nowrap;
+    background:rgba(255,255,255,.18);padding:.35rem .7rem;border-radius:999px;
+    text-decoration:none;border:1px solid rgba(255,255,255,.28);
+  }
+  .topbar a.pdf-doc:hover{background:rgba(255,255,255,.28);text-decoration:none}
 
   .layout{display:flex;align-items:flex-start;max-width:1200px;margin:0 auto}
   .toc{
@@ -188,6 +194,7 @@
   <img class="logo-ayto" src="logo_ayuntamiento.jpg" alt="Ayuntamiento" width="120" height="40" />
   <h1 id="tituloDoc">Cargando…</h1>
   <span class="meta" id="metaDoc"></span>
+  <a class="pdf-doc" id="linkPdf" href="#" target="_blank" rel="noopener" hidden>📄 Descargar PDF</a>
   <button type="button" class="toc-toggle" id="btnToc" aria-expanded="false">Índice</button>
 </header>
 
@@ -208,18 +215,18 @@ const OBSERVACIONES_URL = "https://observaciones.imbio.info/enviar";
 const BTN_OPINAR = "💬 Opinar sobre este artículo";
 
 const CATALOGO = {
-  bando: { titulo: "Bando de Policía y Buen Gobierno", color: "#2f8f5b" },
-  actos: { titulo: "Actos y Procedimientos Administrativos", color: "#2f8f5b" },
-  seguridad: { titulo: "Seguridad Pública y Movilidad", color: "#2e6ea6" },
-  urbano: { titulo: "Desarrollo Urbano", color: "#c1622a" },
-  gobierno: { titulo: "Gobierno Interior", color: "#2f8f5b" },
-  patrimonio: { titulo: "Patrimonio Municipal", color: "#c1622a" },
-  biodiversidad: { titulo: "Biodiversidad y Protección Ambiental", color: "#1f6b42" },
-  comercio: { titulo: "Comercio", color: "#f4b400" },
-  espectaculos: { titulo: "Espectáculos y Diversiones Públicas", color: "#f4b400" },
-  capapa: { titulo: "Comisión de Agua Potable y Alcantarillado (CAPAPA)", color: "#2e6ea6" },
-  servicios: { titulo: "Servicios Públicos Municipales", color: "#2f8f5b" },
-  trabajo: { titulo: "Condiciones de Trabajo", color: "#2f8f5b" },
+  bando: { titulo: "Bando de Policía y Buen Gobierno", color: "#2f8f5b", pdf: "pdfs/Bando_Policia_Buen_Gobierno_Pabellon.pdf" },
+  actos: { titulo: "Actos y Procedimientos Administrativos", color: "#2f8f5b", pdf: "pdfs/Reglamento_Actos_Procedimientos_Administrativos_Pabellon.pdf" },
+  seguridad: { titulo: "Seguridad Pública y Movilidad", color: "#2e6ea6", pdf: "pdfs/Reglamento_Seguridad_Publica_Movilidad_Pabellon.pdf" },
+  urbano: { titulo: "Desarrollo Urbano", color: "#c1622a", pdf: "pdfs/Reglamento_Desarrollo_Urbano_Pabellon.pdf" },
+  gobierno: { titulo: "Gobierno Interior", color: "#2f8f5b", pdf: "pdfs/Reglamento_Gobierno_Interior_Pabellon.pdf" },
+  patrimonio: { titulo: "Patrimonio Municipal", color: "#c1622a", pdf: "pdfs/Reglamento_Patrimonio_Municipal_Pabellon.pdf" },
+  biodiversidad: { titulo: "Biodiversidad y Protección Ambiental", color: "#1f6b42", pdf: "pdfs/Reglamento_Biodiversidad_Ambiental_Animal_Pabellon.pdf" },
+  comercio: { titulo: "Comercio", color: "#f4b400", pdf: "pdfs/Reglamento_Comercio_Via_Publica_Pabellon.pdf" },
+  espectaculos: { titulo: "Espectáculos y Diversiones Públicas", color: "#f4b400", pdf: "pdfs/Reglamento_Espectaculos_Festejos_Pabellon.pdf" },
+  capapa: { titulo: "Comisión de Agua Potable y Alcantarillado (CAPAPA)", color: "#2e6ea6", pdf: "pdfs/Reglamento_CAPAPA_Pabellon.pdf" },
+  servicios: { titulo: "Servicios Públicos Municipales", color: "#2f8f5b", pdf: "pdfs/Reglamento_Servicios_Publicos_Pabellon.pdf" },
+  trabajo: { titulo: "Condiciones de Trabajo", color: "#2f8f5b", pdf: "pdfs/Reglamento_Condiciones_Trabajo_Pabellon.pdf" },
 };
 
 const params = new URLSearchParams(location.search);
@@ -384,6 +391,13 @@ async function init() {
   document.getElementById("tituloDoc").textContent = cat.titulo;
   document.title = `${cat.titulo} — Lectura | IMBIO`;
   document.querySelector(".topbar").style.borderBottom = `3px solid ${cat.color}`;
+  const linkPdf = document.getElementById("linkPdf");
+  if (cat.pdf) {
+    linkPdf.href = cat.pdf;
+    linkPdf.hidden = false;
+  } else {
+    linkPdf.hidden = true;
+  }
 
   let todos;
   try {

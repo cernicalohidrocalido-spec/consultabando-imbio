@@ -191,6 +191,11 @@
     color:var(--azul-marino);text-decoration:none;
   }
   .tarjeta a.enlace-lectura:hover{text-decoration:underline}
+  .tarjeta a.enlace-pdf{
+    display:inline-block;margin-top:.25rem;font-size:.85rem;font-weight:600;
+    color:var(--azul-marino-claro);text-decoration:none;
+  }
+  .tarjeta a.enlace-pdf:hover{text-decoration:underline}
   .tarjeta .acciones{margin-top:auto;padding-top:.35rem;display:flex;flex-direction:column;gap:.15rem}
   .sin-resultados{display:none; text-align:center; color:var(--texto-sec); padding:1.5rem}
 
@@ -326,6 +331,21 @@ const ASISTENTE_URL = "https://asistente.imbio.info";
 /* ============================================================
    Catálogo de reglamentos (para las tarjetas de exploración)
    ============================================================ */
+const PDF_POR_DOC = {
+  bando: "pdfs/Bando_Policia_Buen_Gobierno_Pabellon.pdf",
+  actos: "pdfs/Reglamento_Actos_Procedimientos_Administrativos_Pabellon.pdf",
+  seguridad: "pdfs/Reglamento_Seguridad_Publica_Movilidad_Pabellon.pdf",
+  urbano: "pdfs/Reglamento_Desarrollo_Urbano_Pabellon.pdf",
+  gobierno: "pdfs/Reglamento_Gobierno_Interior_Pabellon.pdf",
+  patrimonio: "pdfs/Reglamento_Patrimonio_Municipal_Pabellon.pdf",
+  biodiversidad: "pdfs/Reglamento_Biodiversidad_Ambiental_Animal_Pabellon.pdf",
+  comercio: "pdfs/Reglamento_Comercio_Via_Publica_Pabellon.pdf",
+  espectaculos: "pdfs/Reglamento_Espectaculos_Festejos_Pabellon.pdf",
+  capapa: "pdfs/Reglamento_CAPAPA_Pabellon.pdf",
+  servicios: "pdfs/Reglamento_Servicios_Publicos_Pabellon.pdf",
+  trabajo: "pdfs/Reglamento_Condiciones_Trabajo_Pabellon.pdf",
+};
+
 const REGLAMENTOS = [
   {id:"bando", categoria:"General", color:"#2f8f5b", icono:"🏛️", titulo:"Bando de Policía y Buen Gobierno",
    resumen:"Las reglas generales de convivencia y organización del municipio.",
@@ -479,6 +499,7 @@ function hitHTML(h) {
     </div>`;
 }
 function tarjetaHTML(r){
+  const pdf = PDF_POR_DOC[r.id] || "";
   return `<div class="tarjeta" style="border-top:4px solid ${r.color}">
     <div class="icono">${r.icono}</div>
     <h3>${r.titulo}</h3>
@@ -486,6 +507,7 @@ function tarjetaHTML(r){
     <p class="kid">${r.kid}</p>
     <div class="acciones">
       <a class="enlace-lectura" href="lectura.html?doc=${r.id}">Leer el reglamento →</a>
+      ${pdf ? `<a class="enlace-pdf" href="${pdf}" target="_blank" rel="noopener">📄 Descargar PDF</a>` : ""}
       <button type="button" class="enlace" style="background:none;border:none;padding:0;cursor:pointer;font:inherit;text-align:left;color:var(--azul-marino-claro)" onclick="abrirFormularioReglamento('${r.id}')">Enviar duda sobre este reglamento →</button>
     </div>
   </div>`;
