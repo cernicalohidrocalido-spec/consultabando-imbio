@@ -15,36 +15,48 @@
   input[type=password]{ padding:.55rem .7rem; border:1px solid var(--borde); border-radius:8px; flex:1 1 220px; }
   button{ background:var(--verde); color:#fff; border:none; padding:.55rem 1.1rem; border-radius:8px; cursor:pointer; font-weight:600; }
   button.secundario{ background:var(--azul); }
+  button:disabled{ opacity:.6; cursor:wait; }
   #estado{ font-size:.85rem; color:#666; margin-bottom:1rem; }
   table{ width:100%; border-collapse:collapse; background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.06); }
   th, td{ text-align:left; padding:.6rem .7rem; border-bottom:1px solid var(--borde); font-size:.88rem; vertical-align:top; }
   th{ background:#eef2f5; }
   tr:last-child td{ border-bottom:none; }
   .comentario{ max-width:340px; white-space:pre-wrap; }
+  .folio{ font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap; color:var(--azul); }
 </style>
 </head>
 <body>
 <header><h1>📋 Panel de Observaciones — Consulta Pública IMBIO</h1></header>
 <main>
   <div class="barra">
-    <input type="password" id="token" placeholder="Contraseña (ADMIN_TOKEN)" />
-    <button onclick="cargar()">Ver observaciones</button>
-    <button class="secundario" onclick="exportarCSV()">Descargar CSV</button>
+    <input type="password" id="token" placeholder="Contraseña (ADMIN_TOKEN)" autocomplete="current-password" />
+    <button type="button" onclick="cargar()">Ver observaciones</button>
+    <button type="button" class="secundario" id="btnCsv" onclick="exportarCSV()">Descargar CSV</button>
   </div>
   <div id="estado"></div>
   <table id="tabla" style="display:none">
     <thead>
-      <tr><th>Fecha</th><th>Nombre</th><th>Contacto</th><th>Reglamento</th><th>Artículo</th><th>Comentario</th></tr>
+      <tr><th>Folio</th><th>Fecha</th><th>Nombre</th><th>Contacto</th><th>Reglamento</th><th>Artículo</th><th>Comentario</th></tr>
     </thead>
     <tbody id="filas"></tbody>
   </table>
 </main>
 <script>
-  // Ajusta esta URL a la del Worker ya desplegado.
   const WORKER_URL = "https://observaciones.imbio.info";
+  const FOLIO_ANIO = "2026";
 
   function guardarToken(){ sessionStorage.setItem("imbio_admin_token", document.getElementById("token").value); }
   document.getElementById("token").value = sessionStorage.getItem("imbio_admin_token") || "";
+
+  function folioDe(id) {
+    const n = Number(id);
+    const num = Number.isFinite(n) && n > 0 ? Math.trunc(n) : 0;
+    return `CP-${FOLIO_ANIO}-${String(num).padStart(4, "0")}`;
+  }
+
+  function authHeaders(token) {
+    return { Authorization: `Bearer ${token}` };
+  }
 
   async function cargar(){
     const token = document.getElementById("token").value.trim();
@@ -52,36 +64,71 @@
     const estado = document.getElementById("estado");
     estado.textContent = "Cargando...";
     try{
-      const resp = await fetch(`${WORKER_URL}/panel?token=${encodeURIComponent(token)}`);
+      const resp = await fetch(`${WORKER_URL}/panel`, {
+        headers: authHeaders(token),
+        cache: "no-store",
+      });
       if(!resp.ok){ estado.textContent = "Contraseña incorrecta o error del servidor."; return; }
       const data = await resp.json();
       estado.textContent = `${data.total} observaciones encontradas.`;
       const filas = document.getElementById("filas");
-      filas.innerHTML = data.observaciones.map(o => `
+      filas.innerHTML = data.observaciones.map(o => {
+        const folio = o.folio || folioDe(o.id);
+        return `
         <tr>
-          <td>${o.creado_en || ""}</td>
+          <td class="folio">${escapeHtml(folio)}</td>
+          <td>${escapeHtml(o.creado_en || "")}</td>
           <td>${escapeHtml(o.nombre)}</td>
           <td>${escapeHtml(o.contacto)}</td>
           <td>${escapeHtml(o.reglamento)}</td>
           <td>${escapeHtml(o.articulo)}</td>
           <td class="comentario">${escapeHtml(o.comentario)}</td>
-        </tr>
-      `).join("");
+        </tr>`;
+      }).join("");
       document.getElementById("tabla").style.display = data.total ? "table" : "none";
     }catch(e){
       estado.textContent = "No se pudo conectar con el Worker.";
     }
   }
 
-  function exportarCSV(){
+  async function exportarCSV(){
     const token = document.getElementById("token").value.trim();
     guardarToken();
-    window.open(`${WORKER_URL}/exportar?token=${encodeURIComponent(token)}`, "_blank");
+    const estado = document.getElementById("estado");
+    const btn = document.getElementById("btnCsv");
+    btn.disabled = true;
+    estado.textContent = "Preparando CSV...";
+    try{
+      // No poner el token en la URL (historial / logs). Usa el mismo Bearer que /panel.
+      const resp = await fetch(`${WORKER_URL}/exportar`, {
+        headers: authHeaders(token),
+        cache: "no-store",
+      });
+      if(!resp.ok){
+        estado.textContent = "No se pudo exportar: contraseña incorrecta o error del servidor.";
+        return;
+      }
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "observaciones_consulta_publica.csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      estado.textContent = "CSV descargado.";
+    }catch(e){
+      estado.textContent = "No se pudo conectar con el Worker para exportar.";
+    }finally{
+      btn.disabled = false;
+    }
   }
 
   function escapeHtml(s){
     return (s || "").toString()
-      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;");
   }
 </script>
 </body>

@@ -1,0 +1,20 @@
+name = "imbio-observaciones"
+main = "worker-observaciones.js"
+compatibility_date = "2026-08-01"
+
+# Ruta pública del Worker (ajusta si usas otro subdominio)
+routes = [
+  { pattern = "observaciones.imbio.info", custom_domain = true }
+]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "imbio_observaciones"
+database_id = "cefa1746-2f30-4ce6-a6d6-e040faaa7dad"
+
+# Variables de entorno de texto plano (no secretas)
+[vars]
+ALLOWED_ORIGIN = "https://consultabando.imbio.info"
+
+# ADMIN_TOKEN se agrega como SECRET, no aquí:
+#   wrangler secret put ADMIN_TOKEN
