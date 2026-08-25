@@ -58,6 +58,12 @@
   }
   header h1{margin:.2rem 0; font-size:1.75rem; font-weight:800; color:#fff}
   header p.desc{max-width:640px; margin:.7rem auto 0; color:#fff; font-size:1rem; opacity:.95}
+  header .btn-exposicion{
+    display:inline-block; margin-top:1.1rem; background:#fff; color:var(--azul-marino);
+    padding:.55rem 1.15rem; border-radius:999px; font-weight:700; font-size:.95rem;
+    text-decoration:none; border:1px solid rgba(255,255,255,.35);
+  }
+  header .btn-exposicion:hover{background:rgba(255,255,255,.92); text-decoration:none}
   main{max-width:920px; margin:0 auto; padding:1.4rem 1rem 3rem}
 
   .asistente{
@@ -221,6 +227,30 @@
   }
   .fuente-card a.btn-pdf:hover{background:var(--azul-marino-claro); text-decoration:none}
 
+  .bando-card{
+    background:linear-gradient(135deg, var(--azul-marino), var(--azul-marino-claro));
+    color:#fff; border:none; border-radius:16px; padding:1.3rem 1.4rem;
+    margin-bottom:1.8rem; box-shadow:var(--sombra);
+  }
+  .bando-card .etiqueta-fuente{
+    display:inline-block; font-size:.72rem; font-weight:700; letter-spacing:.08em;
+    text-transform:uppercase; color:rgba(255,255,255,.85); margin-bottom:.4rem;
+  }
+  .bando-card h3{margin:0 0 .25rem; font-size:1.2rem; color:#fff}
+  .bando-card .jerarquia{margin:0 0 .65rem; font-size:.92rem; font-weight:600; color:rgba(255,255,255,.92)}
+  .bando-card p.resumen{margin:0 0 1rem; font-size:.92rem; color:rgba(255,255,255,.88); line-height:1.5; max-width:640px}
+  .bando-card .acciones{display:flex; flex-wrap:wrap; gap:.55rem .9rem; align-items:center}
+  .bando-card a{
+    color:#fff; font-weight:700; font-size:.9rem; text-decoration:underline;
+    text-underline-offset:2px;
+  }
+  .bando-card a:hover{opacity:.9}
+  .bando-card button.enlace{
+    background:none; border:none; padding:0; cursor:pointer; font:inherit;
+    color:#fff; font-weight:700; font-size:.9rem; text-decoration:underline;
+    text-underline-offset:2px;
+  }
+
   .cta{
     margin-top:2rem; background:var(--verde-claro); border-radius:16px; padding:1.4rem; text-align:left;
   }
@@ -262,6 +292,7 @@
   <span class="badge">📢 CONSULTA PÚBLICA</span>
   <h1>Consulta Pública sobre la actualización del Marco Legal de Pabellón de Arteaga</h1>
   <p class="desc">Tu opinión es parte del proceso: comparte tu duda u observación y el reglamento o artículo relacionado, para revisión jurídica y verificar si procede antes de someterlo a Cabildo para su publicación. Aquí puedes leer los documentos en lenguaje sencillo y buscar artículos reales por tema.</p>
+  <a class="btn-exposicion" href="exposicion.html">📋 ¿Por qué este cambio?</a>
 </header>
 
 <main>
@@ -273,14 +304,26 @@
   </div>
 
   <h2 class="fuente-sec">📖 Documento fuente</h2>
-  <div class="fuente-card">
+  <div class="fuente-card" id="codigo">
     <span class="etiqueta-fuente">Ordenamiento vigente</span>
     <h3>Código Municipal de Pabellón de Arteaga (versión 2024)</h3>
     <p>Es el ordenamiento municipal vigente del cual se derivan el Bando y los 11 reglamentos nuevos: cada uno tomó y reorganizó las partes que le correspondían. Aquí puedes consultarlo o descargarlo completo.</p>
     <a class="btn-pdf" href="pdfs/Codigo_Municipal_v2024.pdf" target="_blank" rel="noopener">📄 Descargar PDF completo</a>
   </div>
 
-  <h2 class="sec">📚 Los 12 documentos</h2>
+  <div class="bando-card" id="bando">
+    <span class="etiqueta-fuente">Documento marco</span>
+    <h3>Bando de Policía y Buen Gobierno</h3>
+    <p class="jerarquia">Marco general del cual derivan los 11 reglamentos</p>
+    <p class="resumen">Las reglas generales de convivencia y organización del municipio. Es el documento marco del nuevo sistema normativo, no un reglamento de materia como Comercio o Seguridad Pública.</p>
+    <div class="acciones">
+      <a href="lectura.html?doc=bando">Leer el Bando →</a>
+      <a href="pdfs/Bando_Policia_Buen_Gobierno_Pabellon.pdf" target="_blank" rel="noopener">📄 Descargar PDF</a>
+      <button type="button" class="enlace" onclick="abrirFormularioReglamento('bando')">Enviar duda sobre el Bando →</button>
+    </div>
+  </div>
+
+  <h2 class="sec">📚 Los 11 reglamentos derivados</h2>
   <div class="controles">
     <input id="buscador" type="text" placeholder="Filtrar por palabra..." oninput="filtrar()" />
   </div>
@@ -464,7 +507,8 @@ fetch("data/articulos.json?v=origen2024")
 
 /* ---------- Tarjetas de reglamentos ---------- */
 function chipHTML(){
-  const cats = ["Todos", ...new Set(REGLAMENTOS.map(r=>r.categoria))];
+  const derivados = reglamentosDerivados();
+  const cats = ["Todos", ...new Set(derivados.map(r=>r.categoria))];
   document.getElementById("chips").innerHTML = cats.map((c,i)=>
     `<button class="chip ${i===0?'activo':''}" data-cat="${c}" onclick="setCategoria('${c}')">${c}</button>`
   ).join("");
@@ -474,6 +518,9 @@ function setCategoria(c){
   categoriaActual = c;
   document.querySelectorAll(".chip").forEach(b=>b.classList.toggle("activo", b.dataset.cat===c));
   filtrar();
+}
+function reglamentosDerivados(){
+  return REGLAMENTOS.filter(r => r.id !== "bando");
 }
 function nombreLegalDe(docId){
   const a = ARTICULOS.find(x => x.doc === docId);
@@ -543,13 +590,14 @@ function tarjetaHTML(r){
   </div>`;
 }
 function render(lista){
+  const derivados = reglamentosDerivados();
   document.getElementById("grid").innerHTML = lista.map(tarjetaHTML).join("");
-  document.getElementById("contador").textContent = `${lista.length} de ${REGLAMENTOS.length} reglamentos`;
+  document.getElementById("contador").textContent = `${lista.length} de ${derivados.length} reglamentos`;
   document.getElementById("sinResultados").style.display = lista.length ? "none" : "block";
 }
 function filtrar(){
   const q = document.getElementById("buscador").value.trim().toLowerCase();
-  let lista = REGLAMENTOS.filter(r => categoriaActual==="Todos" || r.categoria===categoriaActual);
+  let lista = reglamentosDerivados().filter(r => categoriaActual==="Todos" || r.categoria===categoriaActual);
   if(q){
     lista = lista.filter(r =>
       r.titulo.toLowerCase().includes(q) ||
@@ -751,7 +799,7 @@ document.getElementById("formObservacion").addEventListener("submit", async (e) 
 
 /* ---------- Inicialización ---------- */
 chipHTML();
-render(REGLAMENTOS);
+filtrar();
 </script>
 </body>
 </html>
