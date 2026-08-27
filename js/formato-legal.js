@@ -63,7 +63,7 @@ function separarEpilogo(content) {
   const resto = m[2].trim();
   // Epílogo: frase larga sin aspecto de continuación de lista
   if (resto.length < 40) return { content, epilogo: "" };
-  if (/^(?:[IVXLCDM]+|\d+)\.-|^[a-z](?:\.\d+)?\)/i.test(resto)) {
+  if (/^(?:[IVXLCDM]+|\d+)\.-|^[a-z](?:\.\d+)?\)/.test(resto)) {
     return { content, epilogo: "" };
   }
   return { content: m[1].trim(), epilogo: resto };
@@ -106,7 +106,9 @@ function itemsAnidadosAHtml(items) {
 
 function formatearListasJerarquicas(s) {
   // subinciso | inciso (a) / a). / a).-) | fracción romana o arábiga
-  const re = /([a-z]\.\d+\.-)|([a-z]\)\.?-?)|((?:[IVXLCDM]+|\d+)\.-)/gi;
+  // Incisos/subincisos: solo minúsculas y tras separador (evita (IMBIO), (sic), etc.)
+  const re =
+    /(?<=[\s;,]|^)([a-z]\.\d+\.-)|(?<=[\s;,]|^)([a-z]\)\.?-?)|((?:[IVXLCDM]+|\d+)\.-)/g;
   if (!re.test(s)) return s;
   re.lastIndex = 0;
 
