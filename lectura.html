@@ -15,7 +15,7 @@
     --azul:#0B3D75; --bg:#f4f6f8; --card:#ffffff;
     --texto:#1f2a24; --texto-sec:#3d4a43; --borde:#d8e0e8;
     --sombra:0 4px 18px rgba(0,42,92,.1);
-    --toc-w:280px;
+    --toc-w:320px;
   }
   *{box-sizing:border-box}
   [hidden]{display:none!important}
@@ -59,9 +59,16 @@
   .toc-list li{margin:0}
   .toc-list a{
     display:block;padding:.28rem .4rem;border-radius:6px;color:var(--texto-sec);
+    line-height:1.35;
   }
   .toc-list a:hover,.toc-list a.activo{background:var(--verde-claro);color:var(--azul-marino);text-decoration:none}
   .toc-list a.oculto{display:none}
+  .toc-list .toc-num{font-weight:700;color:var(--azul-marino)}
+  .toc-list .toc-kw{
+    display:block;font-size:.72rem;font-weight:500;color:#5a6b7a;
+    margin-top:.08rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .toc-list a:hover .toc-kw,.toc-list a.activo .toc-kw{color:var(--azul-marino-claro)}
 
   .contenido{flex:1;min-width:0;padding:1.2rem 1.4rem 3rem;max-width:720px}
   .contenido .intro{color:var(--texto-sec);font-size:.9rem;margin:0 0 1.4rem}
@@ -319,6 +326,59 @@ function normaliza(s) {
   return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 
+/** Stopwords / ruido legal para palabras clave del índice (2–3 palabras). */
+const TOC_STOP = new Set([
+  "las","los","del","que","por","para","con","una","uno","unos","unas","este","esta","estos","estas",
+  "como","asi","son","ser","sus","su","al","el","la","de","en","y","o","u","e","se","es","lo","le","les",
+  "un","mi","tu","si","ya","muy","mas","tan","todo","toda","todos","todas","tanto","tambien","ademas",
+  "segun","mismo","misma","mismos","mismas","dicho","dicha","dichos","dichas","presente","municipio",
+  "codigo","articulo","fraccion","conforme","mediante","debera","deberan","podra","podran","sera","seran",
+  "cuando","donde","quien","quienes","respecto","entre","sobre","bajo","ante","desde","hasta","hacia",
+  "durante","sin","tras","cada","cual","cuales","cuyo","cuya","cuyos","cuyas","aquellos","aquellas",
+  "aquel","aquella","habra","habran","haya","hayan","sea","sean","fue","fueron","sido","siendo","estar",
+  "estan","estara","debe","deben","puede","pueden","tienen","tiene","tendra","tendran","publico","interes",
+  "general","aplicacion","obligatorias","ciudadanos","tengan","domicilio","esten","paso","reglamentarias",
+  "politica","estados","unidos","mexicanos","constitucion","estado","aguascalientes","leyes","regulan",
+  "actividad","municipal","demas","relativos","ley","siguiente","siguientes","preferentemente","sujetaran",
+  "corresponderan","integran","integrara","ningun","motivo","traves","cualquiera","anterior","posterior",
+  "referido","referida","inciso","incisos","numeral","numerales","fracciones","parrafo","parrafos",
+  "caso","casos","efecto","efectos","terminos","termino","disposicion","disposiciones",
+].map((w) => normaliza(w)));
+
+/** Genera 2–3 palabras clave a partir del inicio del artículo (solo para el índice). */
+function resumenArticulo(texto) {
+  let t = String(texto || "")
+    .replace(/^º\.?[-–—.]?\s*/i, "")
+    .replace(/^Artículo\s+\d+[°º.]?\s*[-–—.]?\s*/i, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const mLista = t.match(
+    /^(.{8,100}?)\s+se\s+sujetar[aá]n\s+preferentemente\s+al\s+orden\s+siguiente/i
+  );
+  if (mLista) {
+    const subj = (mLista[1].match(/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+/g) || []).filter((w) => {
+      const n = normaliza(w);
+      return n.length >= 3 && !TOC_STOP.has(n);
+    });
+    if (subj.length) return ("orden " + subj.slice(0, 2).join(" ")).trim();
+  }
+
+  const pool = [];
+  for (const chunk of t.split(/[.;]/).filter(Boolean).slice(0, 4)) {
+    const words = chunk.match(/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9]+/g) || [];
+    for (const w of words) {
+      const n = normaliza(w);
+      if (n.length < 4 || TOC_STOP.has(n) || /^\d+$/.test(n)) continue;
+      if (pool.some((p) => normaliza(p) === n)) continue;
+      pool.push(w);
+      if (pool.length >= 3) break;
+    }
+    if (pool.length >= 3) break;
+  }
+  return pool.slice(0, 3).join(" ");
+}
+
 function renderError(msg) {
   document.getElementById("tituloDoc").textContent = "Reglamento no encontrado";
   document.getElementById("contenido").innerHTML = `<div class="error">${msg}<br><br><a href="index.html">← Volver al inicio</a></div>`;
@@ -546,7 +606,12 @@ async function init() {
   const cuerpo = document.getElementById("contenido");
 
   toc.innerHTML = arts.map((a) => {
-    return `<li><a href="#art-${a._slug}" data-art="${a._slug}">Artículo ${escapeHtml(String(a.articulo))}</a></li>`;
+    const kw = resumenArticulo(a.texto);
+    a._kw = kw;
+    const kwHtml = kw
+      ? `<span class="toc-kw">${escapeHtml(kw)}</span>`
+      : "";
+    return `<li><a href="#art-${a._slug}" data-art="${a._slug}" data-kw="${escapeHtml(kw)}" title="${escapeHtml(kw || ("Artículo " + a.articulo))}"><span class="toc-num">Artículo ${escapeHtml(String(a.articulo))}</span>${kwHtml}</a></li>`;
   }).join("");
 
   const intro = soloConsulta
@@ -603,7 +668,8 @@ async function init() {
     arts.forEach((a, i) => {
       const txt = normaliza(a.texto);
       const num = normaliza(String(a.articulo));
-      const match = num.includes(q) || txt.includes(q);
+      const kw = normaliza(a._kw || "");
+      const match = num.includes(q) || txt.includes(q) || kw.includes(q);
       links[i].classList.toggle("oculto", !match);
       articles[i].classList.toggle("oculto", !match);
       articles[i].classList.toggle("resaltado", match);
