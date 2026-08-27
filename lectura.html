@@ -53,8 +53,9 @@
   .toc h2{margin:0 0 .6rem;font-size:.85rem;text-transform:uppercase;letter-spacing:.04em;color:var(--azul-marino)}
   #buscaToc{
     width:100%;padding:.45rem .6rem;border:1px solid var(--borde);border-radius:8px;
-    font-size:.85rem;background:var(--bg);color:var(--texto);margin-bottom:.6rem;
+    font-size:.85rem;background:var(--bg);color:var(--texto);margin-bottom:.35rem;
   }
+  #buscaToc-hint{font-size:.72rem;color:#5a6b7a;margin:0 0 .5rem;min-height:1.1em}
   .toc-list{list-style:none;margin:0;padding:0;font-size:.82rem}
   .toc-list li{margin:0}
   .toc-list a{
@@ -241,6 +242,7 @@
   <aside class="toc" id="panelToc" aria-label="Índice de artículos">
     <h2>Índice</h2>
     <input type="search" id="buscaToc" placeholder="Buscar artículo o texto…" autocomplete="off" />
+    <p id="buscaToc-hint" aria-live="polite"></p>
     <ol class="toc-list" id="tocList"></ol>
   </aside>
   <main class="contenido" id="contenido">
@@ -259,7 +261,7 @@ const CATALOGO = {
     color: "#5a6b7a",
     pdf: "pdfs/Codigo_Municipal_v2024.pdf",
     docx: "docx/Codigo_Municipal_v2024.docx",
-    fuente: "data/codigo_municipal.json?v=lecturaCodigo1",
+    fuente: "data/codigo_municipal.json?v=lecturaCodigo2",
     soloConsulta: true,
     nombreLegal: "Código Municipal de Pabellón de Arteaga (versión 2024)",
   },
@@ -608,11 +610,67 @@ async function init() {
   toc.innerHTML = arts.map((a) => {
     const kw = resumenArticulo(a.texto);
     a._kw = kw;
+    a._normNum = normaliza(String(a.articulo));
+    a._normKw = normaliza(kw);
+    a._normText = normaliza(a.texto);
     const kwHtml = kw
       ? `<span class="toc-kw">${escapeHtml(kw)}</span>`
       : "";
     return `<li><a href="#art-${a._slug}" data-art="${a._slug}" data-kw="${escapeHtml(kw)}" title="${escapeHtml(kw || ("Artículo " + a.articulo))}"><span class="toc-num">Artículo ${escapeHtml(String(a.articulo))}</span>${kwHtml}</a></li>`;
   }).join("");
+
+  const tocLinks = Array.from(toc.querySelectorAll("a"));
+  const buscaHint = document.getElementById("buscaToc-hint");
+  let buscaTimer = null;
+
+  function articuloCoincide(a, q) {
+    if (!q) return true;
+    if (/^\d+$/.test(q)) {
+      return a._normNum === q || a._normNum.startsWith(q);
+    }
+    return a._normNum.includes(q) || a._normKw.includes(q) || a._normText.includes(q);
+  }
+
+  function filtrarIndice(qRaw) {
+    const q = normaliza(String(qRaw || "").trim());
+    let visibles = 0;
+    let primero = null;
+    for (let i = 0; i < arts.length; i++) {
+      const match = articuloCoincide(arts[i], q);
+      tocLinks[i].classList.toggle("oculto", !match);
+      if (match) {
+        visibles++;
+        if (!primero) primero = tocLinks[i];
+      }
+    }
+    if (!q) {
+      buscaHint.textContent = "";
+    } else if (visibles === 0) {
+      buscaHint.textContent = "Sin resultados. Prueba otro número o palabra.";
+    } else {
+      buscaHint.textContent = visibles === 1
+        ? "1 artículo encontrado"
+        : `${visibles} artículos encontrados`;
+    }
+    return primero;
+  }
+
+  const buscaInput = document.getElementById("buscaToc");
+  buscaInput.addEventListener("input", (e) => {
+    const val = e.target.value;
+    if (buscaTimer) clearTimeout(buscaTimer);
+    buscaTimer = setTimeout(() => { filtrarIndice(val); }, 220);
+  });
+  buscaInput.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    if (buscaTimer) {
+      clearTimeout(buscaTimer);
+      buscaTimer = null;
+    }
+    const primero = filtrarIndice(buscaInput.value);
+    if (primero) primero.click();
+  });
 
   const intro = soloConsulta
     ? `<p class="intro"><strong>${escapeHtml(nombreLegal)}</strong> — lectura de consulta del ordenamiento vigente. El texto no se altera; las observaciones sobre la reforma se envían desde el Bando y los reglamentos derivados.</p>`
@@ -655,26 +713,6 @@ async function init() {
   // Salto instantáneo (sin animación) y revelar solo cuando ya estamos en el artículo.
   scrollToHash(true);
   window.addEventListener("hashchange", () => scrollToHash(false));
-
-  document.getElementById("buscaToc").addEventListener("input", (e) => {
-    const q = normaliza(e.target.value.trim());
-    const links = toc.querySelectorAll("a");
-    const articles = cuerpo.querySelectorAll(".articulo");
-    if (!q) {
-      links.forEach((a) => { a.classList.remove("oculto"); });
-      articles.forEach((art) => { art.classList.remove("oculto", "resaltado"); });
-      return;
-    }
-    arts.forEach((a, i) => {
-      const txt = normaliza(a.texto);
-      const num = normaliza(String(a.articulo));
-      const kw = normaliza(a._kw || "");
-      const match = num.includes(q) || txt.includes(q) || kw.includes(q);
-      links[i].classList.toggle("oculto", !match);
-      articles[i].classList.toggle("oculto", !match);
-      articles[i].classList.toggle("resaltado", match);
-    });
-  });
 
   document.getElementById("btnToc").addEventListener("click", () => {
     const panel = document.getElementById("panelToc");
